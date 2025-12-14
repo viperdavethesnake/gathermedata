@@ -205,24 +205,80 @@ function Show-Corpora {
 
 function Download-FromS3 {
     param(
+        [string]$Bucket,
         [string]$Key,
-        [string]$LocalPath
+        [string]$LocalPath,
+        [int]$MaxRetries = 3
     )
     
-    try {
-        $dir = Split-Path $LocalPath -Parent
-        if (!(Test-Path $dir)) {
-            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    $attempt = 0
+    while ($attempt -lt $MaxRetries) {
+        try {
+            $dir = Split-Path $LocalPath -Parent
+            if (!(Test-Path $dir)) {
+                New-Item -ItemType Directory -Path $dir -Force | Out-Null
+            }
+            
+            $url = "https://$Bucket.s3.amazonaws.com/$Key"
+            Invoke-WebRequest -Uri $url -OutFile $LocalPath -TimeoutSec 300 -ErrorAction Stop
+            return $true
         }
-        
-        $url = "https://$S3Bucket.s3.amazonaws.com/$Key"
-        Invoke-WebRequest -Uri $url -OutFile $LocalPath -TimeoutSec 300 -ErrorAction Stop
-        return $true
+        catch {
+            $attempt++
+            if ($attempt -eq $MaxRetries) {
+                Write-Warning "Failed to download $Key after $MaxRetries attempts: $_"
+                return $false
+            }
+            Start-Sleep -Seconds 2
+        }
     }
-    catch {
-        Write-Warning "Failed to download $Key : $_"
-        return $false
-    }
+    return $false
+}
+
+function Get-S3Objects {
+    param(
+        [string]$Bucket,
+        [string]$Prefix,
+        [int]$MaxKeys = 1000
+    )
+    
+    $objects = @()
+    $marker = $null
+    $baseUrl = "https://$Bucket.s3.amazonaws.com"
+    
+    do {
+        try {
+            $url = "$baseUrl`?prefix=$Prefix&max-keys=$MaxKeys"
+            if ($marker) {
+                $url += "&marker=$marker"
+            }
+            
+            [xml]$response = Invoke-RestMethod -Uri $url -Method Get -TimeoutSec 30
+            
+            foreach ($content in $response.ListBucketResult.Contents) {
+                if ($content.Key -and $content.Key -notlike '*/') {
+                    $objects += @{
+                        Key = $content.Key
+                        Size = [long]$content.Size
+                    }
+                }
+            }
+            
+            $isTruncated = $response.ListBucketResult.IsTruncated -eq 'true'
+            if ($isTruncated) {
+                $marker = $response.ListBucketResult.NextMarker
+                if (-not $marker) {
+                    $marker = $objects[-1].Key
+                }
+            }
+        }
+        catch {
+            Write-Warning "Failed to list S3 objects: $_"
+            break
+        }
+    } while ($isTruncated)
+    
+    return $objects
 }
 
 # Main Script
@@ -292,9 +348,61 @@ if ($Scenario) {
         exit 0
     }
     
-    Write-Host "`nNote: Scenario downloads are large and may take several hours." -ForegroundColor Yellow
-    Write-Host "Consider using the Python version for better progress tracking." -ForegroundColor Yellow
-    Write-Host "`nDownload location: $scenarioDir" -ForegroundColor Cyan
+    Write-Host "`nListing files from S3..." -ForegroundColor Cyan
+    $prefix = "corpora/scenarios/$Scenario/"
+    $objects = Get-S3Objects -Bucket $S3Bucket -Prefix $prefix
+    
+    if ($objects.Count -eq 0) {
+        Write-Host "No files found for scenario '$Scenario'" -ForegroundColor Yellow
+        exit 1
+    }
+    
+    # Filter out files that already exist
+    $filesToDownload = @()
+    foreach ($obj in $objects) {
+        $relativePath = $obj.Key.Replace($prefix, '')
+        $localPath = Join-Path $scenarioDir $relativePath
+        
+        if (-not (Test-Path $localPath)) {
+            $filesToDownload += @{
+                Key = $obj.Key
+                LocalPath = $localPath
+                Size = $obj.Size
+            }
+        }
+    }
+    
+    if ($filesToDownload.Count -eq 0) {
+        Write-Host "All files already downloaded!" -ForegroundColor Green
+    }
+    else {
+        Write-Host "Downloading $($filesToDownload.Count) files..." -ForegroundColor Cyan
+        
+        $downloaded = 0
+        $failed = 0
+        
+        foreach ($file in $filesToDownload) {
+            Write-Host "  [$($downloaded + 1)/$($filesToDownload.Count)] $(Split-Path $file.LocalPath -Leaf)..." -NoNewline
+            
+            if (Download-FromS3 -Bucket $S3Bucket -Key $file.Key -LocalPath $file.LocalPath) {
+                $downloaded++
+                Write-Host " ✓" -ForegroundColor Green
+            }
+            else {
+                $failed++
+                Write-Host " ✗" -ForegroundColor Red
+            }
+        }
+        
+        Write-Host "`nDownload Summary:" -ForegroundColor Cyan
+        Write-Host "  Downloaded: $downloaded files" -ForegroundColor Green
+        if ($failed -gt 0) {
+            Write-Host "  Failed: $failed files" -ForegroundColor Red
+        }
+    }
+    
+    Write-Host "`n✓ Scenario '$Scenario' complete!" -ForegroundColor Green
+    Write-Host "Location: $scenarioDir" -ForegroundColor Cyan
 }
 
 if ($Corpus) {
@@ -316,9 +424,77 @@ if ($Corpus) {
     $corpusDir = Join-Path $BasePath "file_corpora\$Corpus"
     New-Item -ItemType Directory -Path $corpusDir -Force | Out-Null
     
-    Write-Host "`nNote: For large corpora (SAFEDOCS/UNSAFE-DOCS), use --limit" -ForegroundColor Yellow
-    Write-Host "to download a subset. Full downloads are several TB." -ForegroundColor Yellow
-    Write-Host "`nDownload location: $corpusDir" -ForegroundColor Cyan
+    if ($LargeCorpora.ContainsKey($Corpus) -and $Limit -eq 0) {
+        Write-Host "`n⚠ WARNING: This is a MASSIVE corpus (several TB)" -ForegroundColor Yellow
+        Write-Host "Consider using -Limit to download a subset" -ForegroundColor Yellow
+        $response = Read-Host "Download entire corpus? (yes/no)"
+        if ($response -notmatch '^(yes|y)$') {
+            Write-Host "Aborted. Use -Limit parameter to download a subset." -ForegroundColor Yellow
+            exit 0
+        }
+    }
+    
+    Write-Host "`nListing files from S3..." -ForegroundColor Cyan
+    $prefix = "corpora/files/$Corpus/"
+    $objects = Get-S3Objects -Bucket $S3Bucket -Prefix $prefix
+    
+    if ($objects.Count -eq 0) {
+        Write-Host "No files found for corpus '$Corpus'" -ForegroundColor Yellow
+        exit 1
+    }
+    
+    # Apply limit if specified
+    if ($Limit -gt 0 -and $objects.Count -gt $Limit) {
+        $objects = $objects | Select-Object -First $Limit
+        Write-Host "Limited to $Limit files (out of $($objects.Count) available)" -ForegroundColor Yellow
+    }
+    
+    # Filter out files that already exist
+    $filesToDownload = @()
+    foreach ($obj in $objects) {
+        $relativePath = $obj.Key.Replace($prefix, '')
+        $localPath = Join-Path $corpusDir $relativePath
+        
+        if (-not (Test-Path $localPath)) {
+            $filesToDownload += @{
+                Key = $obj.Key
+                LocalPath = $localPath
+                Size = $obj.Size
+            }
+        }
+    }
+    
+    if ($filesToDownload.Count -eq 0) {
+        Write-Host "All files already downloaded!" -ForegroundColor Green
+    }
+    else {
+        Write-Host "Downloading $($filesToDownload.Count) files..." -ForegroundColor Cyan
+        
+        $downloaded = 0
+        $failed = 0
+        
+        foreach ($file in $filesToDownload) {
+            if (($downloaded + $failed) % 10 -eq 0) {
+                Write-Host "  Progress: $($downloaded + $failed)/$($filesToDownload.Count) files processed..." -ForegroundColor Cyan
+            }
+            
+            if (Download-FromS3 -Bucket $S3Bucket -Key $file.Key -LocalPath $file.LocalPath) {
+                $downloaded++
+            }
+            else {
+                $failed++
+            }
+        }
+        
+        Write-Host "`nDownload Summary:" -ForegroundColor Cyan
+        Write-Host "  Downloaded: $downloaded files" -ForegroundColor Green
+        if ($failed -gt 0) {
+            Write-Host "  Failed: $failed files" -ForegroundColor Red
+        }
+    }
+    
+    Write-Host "`n✓ Corpus '$Corpus' complete!" -ForegroundColor Green
+    Write-Host "Location: $corpusDir" -ForegroundColor Cyan
 }
 
 $elapsed = (Get-Date) - $startTime
