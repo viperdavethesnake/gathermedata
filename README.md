@@ -1,59 +1,49 @@
-# GatherMeData
+# Enterprise NAS Data Loader
 
-A Python-based data download script for automated data collection.
+Downloads real-world data from public repositories for NAS testing environments.
 
-## Description
+## Data Sources
 
-This project provides a script to download and gather data from various sources.
+1. **Office Documents**: GovDocs1 (Digital Corpora)
+2. **Finance/Invoices**: UCSF Industry Documents Library
+3. **Warehouse Images**: Amazon Bin Image Dataset (AWS)
+4. **Sales Logs**: UCI Online Retail II Dataset
 
-## Installation
+## Setup
 
-1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/gathermedata.git
-cd gathermedata
-```
+# Create virtual environment
+python3 -m venv venv
 
-2. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+# Activate virtual environment
+source venv/bin/activate  # Linux/Mac
+# OR
+venv\Scripts\activate  # Windows
 
-3. Install dependencies:
-```bash
+# Install dependencies
 pip install -r requirements.txt
 ```
 
 ## Usage
 
 ```bash
-python main.py
+# Download sample data (~5-10GB)
+python data_loader.py --mode sample
+
+# Download full datasets (100GB+)
+python data_loader.py --mode all
 ```
 
-## Configuration
+## Features
 
-Configuration options can be set in a `config.ini` file (see `config.ini.example` for template).
+- Automatic retry on network failures
+- Progress bars for all downloads
+- Resume capability (skips existing files)
+- Summary report at completion
+- Organized directory structure
 
-## Project Structure
+## Storage Requirements
 
-```
-gathermedata/
-├── main.py           # Main script entry point
-├── requirements.txt  # Python dependencies
-├── README.md        # This file
-├── .gitignore       # Git ignore rules
-└── docs/            # Documentation
-```
+- Sample mode: ~5-10 GB
+- All mode: 100+ GB (potentially 500GB+)
 
-## Requirements
-
-- Python 3.8+
-
-## License
-
-MIT License
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
