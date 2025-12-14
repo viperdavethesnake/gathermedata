@@ -55,8 +55,10 @@ def retry_download(func):
 # --- 1. OFFICE DOCS (GovDocs1) ---
 def download_govdocs(mode):
     print("\n[1/4] Starting GovDocs Download (Real Office Files)...")
+    print("   -> GovDocs1 corpus: ~986,000 files in 1000 ZIP files")
     base_url = "https://downloads.digitalcorpora.org/corpora/files/govdocs1/zipfiles/"
-    threads = range(50) if mode == 'all' else [0, 1]
+    # Sample: 2 threads (~2000 files), All: ALL 1000 threads (~986,000 files)
+    threads = range(1000) if mode == 'all' else [0, 1]
     
     for i in threads:
         thread_id = f"{i:03d}.zip"
