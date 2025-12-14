@@ -346,7 +346,13 @@ Examples:
     
     # Determine base directory
     if args.path:
-        base_dir = os.path.abspath(os.path.expanduser(args.path))
+        # If user provides custom path, ensure DigitalCorpora subfolder
+        custom_base = os.path.abspath(os.path.expanduser(args.path))
+        # Only add DigitalCorpora if not already in the path
+        if 'DigitalCorpora' not in custom_base:
+            base_dir = os.path.join(custom_base, 'DigitalCorpora')
+        else:
+            base_dir = custom_base
     else:
         base_dir = DEFAULT_PATHS.get(sys.platform, DEFAULT_PATHS['linux'])
     

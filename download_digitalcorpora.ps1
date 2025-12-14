@@ -236,10 +236,16 @@ if ($ListCorpora) {
     exit 0
 }
 
+# Ensure DigitalCorpora subfolder
+$BasePath = $Path
+if ($BasePath -notlike "*DigitalCorpora*") {
+    $BasePath = Join-Path $Path "DigitalCorpora"
+}
+
 Write-Host "`n================================================================" -ForegroundColor Cyan
 Write-Host "DIGITAL CORPORA DOWNLOADER" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
-Write-Host "Download path: $Path"
+Write-Host "Download path: $BasePath"
 Write-Host "Parallel workers: $Parallel"
 Write-Host "================================================================" -ForegroundColor Cyan
 
@@ -276,7 +282,7 @@ if ($Scenario) {
     Write-Host "  Size: $($info.Size)"
     Write-Host "  Files: $($info.Files)"
     
-    $scenarioDir = Join-Path $Path "scenarios\$Scenario"
+    $scenarioDir = Join-Path $BasePath "scenarios\$Scenario"
     New-Item -ItemType Directory -Path $scenarioDir -Force | Out-Null
     
     Write-Host "`n⚠ This will download $($info.Size) of data" -ForegroundColor Yellow
@@ -307,7 +313,7 @@ if ($Corpus) {
         Write-Host "  Limit: $Limit files"
     }
     
-    $corpusDir = Join-Path $Path "file_corpora\$Corpus"
+    $corpusDir = Join-Path $BasePath "file_corpora\$Corpus"
     New-Item -ItemType Directory -Path $corpusDir -Force | Out-Null
     
     Write-Host "`nNote: For large corpora (SAFEDOCS/UNSAFE-DOCS), use --limit" -ForegroundColor Yellow
