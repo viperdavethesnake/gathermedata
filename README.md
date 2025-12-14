@@ -90,11 +90,12 @@ python download_govdocs.py --tier complete --path /storage/govdocs
 | Windows (Python) | `S:\Shared` |
 | Windows (PowerShell) | `S:\Shared` |
 
-### Additional Documentation
+### Additional Scripts & Documentation
 
 - **macOS**: See [README_MACOS.md](README_MACOS.md)
 - **Windows**: See [README_WINDOWS.md](README_WINDOWS.md)
 - **GovDocs1 Only**: See [README_GOVDOCS.md](README_GOVDOCS.md) - Dedicated downloader with 7 tiers
+- **Digital Corpora**: See [README_DIGITALCORPORA.md](README_DIGITALCORPORA.md) - Forensic scenarios & file corpora
 
 ## Features
 
@@ -128,4 +129,10 @@ python download_govdocs.py --tier complete --path /storage/govdocs
 
 ### GovDocs1 Only (`download_govdocs.py`)
 See [README_GOVDOCS.md](README_GOVDOCS.md) for 7 download tiers from 540 MB to 540 GB
+
+### Digital Corpora (`download_digitalcorpora.py`)
+See [README_DIGITALCORPORA.md](README_DIGITALCORPORA.md) for forensic scenarios and file corpora:
+- **7 Forensic Scenarios**: Complete investigation scenarios (25-223 GB each)
+- **5 File Corpora**: PDFs, audio, video, media collections
+- **2 Large PDF Corpora**: SAFEDOCS (8M PDFs), UNSAFE-DOCS (5.5M files)
 
