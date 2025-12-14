@@ -4,10 +4,16 @@ Downloads real-world data from public repositories for NAS testing environments.
 
 ## Data Sources
 
-1. **Office Documents**: GovDocs1 (Digital Corpora)
-2. **Finance/Invoices**: UCSF Industry Documents Library
-3. **Warehouse Images**: Amazon Bin Image Dataset (AWS)
-4. **Sales Logs**: UCI Online Retail II Dataset
+1. **Office Documents**: GovDocs1 - Real government files (DOC, PDF, PPT, XLS, HTML)
+2. **Federal Contracts**: USASpending.gov - Structured contract data (JSON)
+   - Real contract awards, recipients, amounts, agencies, descriptions
+3. **Warehouse Images**: Amazon Bin Image Dataset - Product bin photos (JPG)
+4. **Financial Statements**: SEC EDGAR - Company financial filings (CSV)
+   - Real 10-K/10-Q data: balance sheets, income statements, cash flows
+   - Multiple CSV files per quarter
+5. **Regulatory Documents**: Federal Register - Agency rules and notices (PDF)
+   - Final rules, proposed rules, public notices from federal agencies
+   - Daily updates, excludes presidential documents
 
 ## Setup
 

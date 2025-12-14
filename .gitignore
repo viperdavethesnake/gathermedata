@@ -136,11 +136,12 @@ Thumbs.db
 # Project specific
 data/
 downloads/
-REAL_ENTERPRISE_DATA/
 *.csv
 *.json
 *.xlsx
 *.xls
 config.ini
 secrets.json
+
+# Note: Data downloads to /storage/nexus (ZFS dataset, not in repo)
 
