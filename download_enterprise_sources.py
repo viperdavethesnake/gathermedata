@@ -416,7 +416,13 @@ if __name__ == "__main__":
     
     # Determine base directory
     if args.path:
-        BASE_DIR = os.path.abspath(os.path.expanduser(args.path))
+        custom_base = os.path.abspath(os.path.expanduser(args.path))
+        # Add EnterpriseData subfolder unless already in path
+        # Skip if path contains EnterpriseData, Shared, or nexus (common base dirs)
+        if 'EnterpriseData' not in custom_base and 'Shared' not in custom_base and 'nexus' not in custom_base:
+            BASE_DIR = os.path.join(custom_base, 'EnterpriseData')
+        else:
+            BASE_DIR = custom_base
     else:
         BASE_DIR = DEFAULT_PATHS.get(sys.platform, DEFAULT_PATHS['linux'])
     

@@ -231,11 +231,18 @@ if (($Start + $NumThreads) -gt 1000) {
     $NumThreads = $adjusted
 }
 
+# Add GovDocs1 subfolder unless already in path
+if ($Path -notlike "*GovDocs1*") {
+    $BasePath = Join-Path $Path "GovDocs1"
+} else {
+    $BasePath = $Path
+}
+
 # Display summary
 Write-Host "`n================================================================" -ForegroundColor Cyan
 Write-Host "GOVDOCS1 DOWNLOADER" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
-Write-Host "Download path:   $Path"
+Write-Host "Download path:   $BasePath"
 Write-Host "Thread range:    $("{0:D3}" -f $Start) to $("{0:D3}" -f ($Start + $NumThreads - 1))"
 Write-Host "Parallel jobs:   $Parallel"
 Write-Host "================================================================" -ForegroundColor Cyan
@@ -252,13 +259,13 @@ if ($NumThreads -ge 250) {
 }
 
 # Create base directory
-if (-not (Test-Path $Path)) {
-    New-Item -ItemType Directory -Path $Path -Force | Out-Null
+if (-not (Test-Path $BasePath)) {
+    New-Item -ItemType Directory -Path $BasePath -Force | Out-Null
 }
 
 Write-Host "`nDownloading GovDocs1 Corpus" -ForegroundColor Green
 Write-Host "  Threads: $Start to $($Start + $NumThreads - 1)"
-Write-Host "  Target: $Path"
+Write-Host "  Target: $BasePath"
 Write-Host ""
 
 $startTime = Get-Date
@@ -274,7 +281,7 @@ $results = $threadRange | ForEach-Object -Parallel {
     $BaseUrl = $using:BaseUrl
     $MaxRetries = $using:MaxRetries
     $RetryDelay = $using:RetryDelay
-    $BaseDir = $using:Path
+    $BaseDir = $using:BasePath
     $ThreadNum = $_
     
     $threadId = "{0:D3}.zip" -f $ThreadNum
@@ -354,7 +361,7 @@ foreach ($result in $results) {
 $totalFiles = 0
 $totalSize = 0
 
-Get-ChildItem -Path $Path -File -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+Get-ChildItem -Path $BasePath -File -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
     $totalFiles++
     $totalSize += $_.Length
 }
@@ -369,7 +376,7 @@ Write-Host "Successful:  $successful threads"
 Write-Host "Failed:      $failed threads"
 Write-Host "Skipped:     $skipped threads (already downloaded)"
 Write-Host "Total:       $($successful + $skipped) threads"
-Write-Host "Location:    $Path"
+Write-Host "Location:    $BasePath"
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host "`nActual Data:"
 Write-Host "  Files: $($totalFiles.ToString('N0'))"

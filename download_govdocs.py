@@ -295,7 +295,12 @@ Examples:
     
     # Determine base directory
     if args.path:
-        base_dir = os.path.abspath(os.path.expanduser(args.path))
+        custom_base = os.path.abspath(os.path.expanduser(args.path))
+        # Add GovDocs1 subfolder unless already in path
+        if 'GovDocs1' not in custom_base:
+            base_dir = os.path.join(custom_base, 'GovDocs1')
+        else:
+            base_dir = custom_base
     else:
         base_dir = DEFAULT_PATHS.get(sys.platform, DEFAULT_PATHS['linux'])
     

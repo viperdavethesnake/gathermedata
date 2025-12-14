@@ -30,7 +30,13 @@ param(
 )
 
 # --- CONFIGURATION ---
-$BaseDir = $Path
+# Add EnterpriseData subfolder unless already in path
+if ($Path -notlike "*EnterpriseData*" -and $Path -notlike "*Shared*" -and $Path -notlike "*nexus*") {
+    $BaseDir = Join-Path $Path "EnterpriseData"
+} else {
+    $BaseDir = $Path
+}
+
 $Dirs = @{
     OFFICE = Join-Path $BaseDir "1_Office_Docs_GovDocs"
     FINANCE = Join-Path $BaseDir "2_Federal_Contracts_USASpending"
