@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 """
-Enterprise NAS Data Loader
-Downloads real-world data from public repositories for testing.
+Enterprise Data Sources Downloader
+Downloads data from multiple public sources for NAS testing:
+- Amazon warehouse images
+- SEC financial statements
+- Federal Register documents
+- Federal contracts (USASpending.gov)
+- GovDocs1 (use download_govdocs.py for more control)
+
+For specialized downloads:
+- GovDocs1 only: use download_govdocs.py (7 tiers, 1K-986K files)
+- Forensic scenarios: use download_digitalcorpora.py
 """
 import os
 import sys

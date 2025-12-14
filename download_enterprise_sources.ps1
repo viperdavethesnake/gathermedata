@@ -1,17 +1,23 @@
 <#
 .SYNOPSIS
-    Enterprise NAS Data Loader - PowerShell Version
+    Enterprise Data Sources Downloader - PowerShell Version
 .DESCRIPTION
-    Downloads real-world data from public repositories for testing.
+    Downloads data from multiple public sources for NAS testing:
+    - Amazon warehouse images
+    - SEC financial statements
+    - Federal Register documents
+    - Federal contracts (USASpending.gov)
+    - GovDocs1 (use download_govdocs.ps1 for more control)
+    
     Requires PowerShell 7.0 or later (latest: 7.5.4).
 .PARAMETER Mode
     Download mode: 'sample' (small batch) or 'all' (large batch)
 .PARAMETER Path
     Download path (default: S:\Shared)
 .EXAMPLE
-    .\data_loader.ps1 -Mode sample
+    .\download_enterprise_sources.ps1 -Mode sample
 .EXAMPLE
-    .\data_loader.ps1 -Mode all -Path "D:\TestData"
+    .\download_enterprise_sources.ps1 -Mode all -Path "D:\TestData"
 #>
 
 param(

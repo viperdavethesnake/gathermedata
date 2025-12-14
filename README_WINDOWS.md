@@ -1,6 +1,7 @@
-# Enterprise NAS Data Loader - Windows PowerShell Edition
+# Enterprise Data Sources Downloader - Windows PowerShell Edition
 
-Downloads real-world data from public repositories for NAS testing environments.
+Downloads data from multiple public sources for NAS testing:
+- Amazon warehouse images, SEC financials, Federal Register, USASpending contracts, GovDocs1
 
 ## Requirements
 
@@ -59,17 +60,17 @@ Install-Module -Name AWS.Tools.S3 -Force
 ### Download Sample Data (~8 GB)
 
 ```powershell
-.\data_loader.ps1 -Mode sample
+.\download_enterprise_sources.ps1 -Mode sample
 ```
 
 ### Download Full Dataset (~588 GB)
 
 ```powershell
 # Default path: S:\Shared
-.\data_loader.ps1 -Mode all
+.\download_enterprise_sources.ps1 -Mode all
 
 # Custom path
-.\data_loader.ps1 -Mode all -Path "D:\TestData"
+.\download_enterprise_sources.ps1 -Mode all -Path "D:\TestData"
 ```
 
 ### GovDocs1-Only Downloader
@@ -92,8 +93,9 @@ For granular control over GovDocs1 downloads (7 tiers from 540 MB to 540 GB):
 
 ## Default Download Locations
 
-**data_loader.ps1**: `S:\Shared` (override with `-Path`)
+**download_enterprise_sources.ps1**: `S:\Shared` (override with `-Path`)
 **download_govdocs.ps1**: `S:\GovDocs1` (override with `-Path`)
+**download_digitalcorpora.ps1**: `S:\DigitalCorpora` (override with `-Path`)
 
 The script creates subdirectories:
 - `S:\Shared\1_Office_Docs_GovDocs`
@@ -104,8 +106,8 @@ The script creates subdirectories:
 
 ## Features
 
-### Main Data Loader (`data_loader.ps1`)
-- ✅ Downloads from 5 real-world data sources
+### Enterprise Sources (`download_enterprise_sources.ps1`)
+- ✅ Downloads from 5 public data sources
 - ✅ Parallel downloads using PowerShell jobs
 - ✅ Automatic retry on failures (3 attempts)
 - ✅ Progress reporting
@@ -123,7 +125,7 @@ The script creates subdirectories:
 
 ## Estimated Download Sizes
 
-### Main Data Loader (`data_loader.ps1`)
+### Enterprise Sources (`download_enterprise_sources.ps1`)
 
 **Sample Mode:**
 - Download: ~8 GB

@@ -1,6 +1,7 @@
-# Enterprise NAS Data Loader - macOS Edition
+# Enterprise Data Sources Downloader - macOS Edition
 
-Downloads real-world data from public repositories for NAS testing environments.
+Downloads data from multiple public sources for NAS testing:
+- Amazon warehouse images, SEC financials, Federal Register, USASpending contracts, GovDocs1
 
 ## Requirements
 
@@ -106,8 +107,8 @@ python data_loader.py --mode sample --path /Users/yourname/Desktop/TestData
 
 ## Features
 
-### Main Data Loader (`data_loader.py`)
-- ✅ Downloads from 5 real-world data sources
+### Enterprise Sources (`download_enterprise_sources.py`)
+- ✅ Downloads from 5 public data sources
 - ✅ Parallel downloads using threading
 - ✅ Automatic retry on failures (3 attempts)
 - ✅ Progress bars with tqdm
@@ -159,7 +160,7 @@ Add `--parallel 8` for faster downloads with 8 concurrent workers.
 ### 1. Prevent Sleep During Download
 
 ```bash
-caffeinate -i python data_loader.py --mode all
+caffeinate -i python download_enterprise_sources.py --mode all
 ```
 
 ### 2. Use External Drive for Storage
@@ -169,7 +170,7 @@ caffeinate -i python data_loader.py --mode all
 ls -l /Volumes/
 
 # Download to external drive
-python data_loader.py --mode all --path /Volumes/MyExternalDrive/Data
+python download_enterprise_sources.py --mode all --path /Volumes/MyExternalDrive/Data
 ```
 
 ### 3. Check Download Progress (from another terminal)

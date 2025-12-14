@@ -1,6 +1,6 @@
-# Enterprise NAS Data Loader
+# GatherMe Data - Real-World Data Collection Tools
 
-Downloads real-world data from public repositories for NAS testing environments.
+Collection of scripts for downloading real-world data from public repositories for NAS testing, forensics research, and data science.
 
 ## Data Sources
 
@@ -33,27 +33,29 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Main Data Loader (All 5 Sources)
+### Enterprise Sources (Mixed Public Data)
+
+Downloads from Amazon, SEC, Federal Register, and USASpending.
 
 **Python:**
 ```bash
 # Download sample data (~8 GB) - uses platform default path
-python data_loader.py --mode sample
+python download_enterprise_sources.py --mode sample
 
 # Download full datasets (~588 GB)
-python data_loader.py --mode all
+python download_enterprise_sources.py --mode all
 
 # Specify custom download path
-python data_loader.py --mode all --path /mnt/nas/testdata
+python download_enterprise_sources.py --mode all --path /mnt/nas/testdata
 ```
 
 **PowerShell (Windows):**
 ```powershell
 # Download sample data
-.\data_loader.ps1 -Mode sample
+.\download_enterprise_sources.ps1 -Mode sample
 
 # Download full datasets with custom path
-.\data_loader.ps1 -Mode all -Path "D:\TestData"
+.\download_enterprise_sources.ps1 -Mode all -Path "D:\TestData"
 ```
 
 ### GovDocs1-Only Downloader (Dedicated Script)
@@ -99,8 +101,8 @@ python download_govdocs.py --tier complete --path /storage/govdocs
 
 ## Features
 
-### Main Data Loader (`data_loader.py` / `data_loader.ps1`)
-- ✅ Downloads from 5 real-world data sources
+### Enterprise Sources (`download_enterprise_sources.*`)
+- ✅ Downloads from 5 public data sources
 - ✅ Automatic retry on network failures
 - ✅ Progress bars for all downloads
 - ✅ Resume capability (skips existing files)
@@ -118,10 +120,10 @@ python download_govdocs.py --tier complete --path /storage/govdocs
 
 ## Storage Requirements
 
-### Main Data Loader (`data_loader.py`)
+### Enterprise Sources (`download_enterprise_sources.py`)
 - Sample mode: ~8 GB download, ~6 GB storage
 - All mode: ~588 GB download, ~300-588 GB storage
-  - GovDocs1: ~540 GB (1000 threads)
+  - GovDocs1: ~540 GB (1000 threads) - *use download_govdocs.py for tiers*
   - Amazon Images: ~27 GB (50,000 images)
   - SEC Financials: ~12 GB (20 quarters)
   - Federal Register: ~4 GB (10,000 PDFs)
