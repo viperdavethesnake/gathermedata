@@ -6,20 +6,25 @@
     Requires PowerShell 7.0 or later (latest: 7.5.4).
 .PARAMETER Mode
     Download mode: 'sample' (small batch) or 'all' (large batch)
+.PARAMETER Path
+    Download path (default: S:\Shared)
 .EXAMPLE
     .\data_loader.ps1 -Mode sample
 .EXAMPLE
-    .\data_loader.ps1 -Mode all
+    .\data_loader.ps1 -Mode all -Path "D:\TestData"
 #>
 
 param(
     [Parameter()]
     [ValidateSet('sample', 'all')]
-    [string]$Mode = 'sample'
+    [string]$Mode = 'sample',
+    
+    [Parameter()]
+    [string]$Path = "S:\Shared"
 )
 
 # --- CONFIGURATION ---
-$BaseDir = "S:\Shared"
+$BaseDir = $Path
 $Dirs = @{
     OFFICE = Join-Path $BaseDir "1_Office_Docs_GovDocs"
     FINANCE = Join-Path $BaseDir "2_Federal_Contracts_USASpending"
@@ -65,9 +70,11 @@ function Get-GovDocs {
     param([string]$Mode)
     
     Write-Host "`n[1/5] Starting GovDocs Download (Real Office Files)..."
+    Write-Host "   -> GovDocs1 corpus: ~986,000 files in 1000 ZIP files"
     
     $baseUrl = "https://downloads.digitalcorpora.org/corpora/files/govdocs1/zipfiles/"
-    $threads = if ($Mode -eq 'all') { 0..49 } else { @(0) }
+    # Sample: 2 threads, All: 1000 threads (complete corpus)
+    $threads = if ($Mode -eq 'all') { 0..999 } else { @(0, 1) }
     
     foreach ($i in $threads) {
         $threadId = "{0:D3}.zip" -f $i
@@ -157,16 +164,56 @@ function Get-AmazonImages {
     param([string]$Mode)
     
     Write-Host "`n[3/5] Starting Amazon Bin Image Download..."
+    Write-Host "   -> Amazon Bin Images: 536,434 JPG images available"
     
-    # Note: Requires AWS CLI or AWS.Tools.S3 module
-    # Using simple HTTP download approach instead
-    $targetCount = if ($Mode -eq 'sample') { 50 } else { 2000 }
+    # Sample: 50 images, All: 50,000 images (subset of 536K available)
+    $targetCount = if ($Mode -eq 'sample') { 50 } else { 50000 }
     
-    # Amazon bin images are on S3 but require AWS SDK
-    # For PowerShell, using Invoke-WebRequest with known image URLs
-    Write-Host "   -> Amazon S3 images require AWS Tools for PowerShell"
-    Write-Host "   -> Install with: Install-Module -Name AWS.Tools.S3"
-    Write-Host "   -> Skipping for now (Python version recommended for S3 access)"
+    # Check if AWS Tools module is available
+    if (-not (Get-Module -ListAvailable -Name AWS.Tools.S3)) {
+        Write-Host "   -> AWS.Tools.S3 module not found"
+        Write-Host "   -> Install with: Install-Module -Name AWS.Tools.S3 -Force"
+        Write-Host "   -> Skipping Amazon images (use Python version for automatic S3 access)"
+        return
+    }
+    
+    try {
+        Import-Module AWS.Tools.S3 -ErrorAction Stop
+        
+        $bucket = 'aft-vbi-pds'
+        $prefix = 'bin-images/'
+        $downloaded = 0
+        
+        $objects = Get-S3Object -BucketName $bucket -KeyPrefix $prefix -NoAutoIteration | 
+                   Where-Object { $_.Key -match '\.jpg$' } | 
+                   Select-Object -First $targetCount
+        
+        Write-Host "   -> Found $($objects.Count) images to download"
+        
+        foreach ($obj in $objects) {
+            if ($downloaded -ge $targetCount) { break }
+            
+            $fileName = Split-Path $obj.Key -Leaf
+            $localPath = Join-Path $Dirs.WAREHOUSE_IMG $fileName
+            
+            if (-not (Test-Path $localPath)) {
+                Read-S3Object -BucketName $bucket -Key $obj.Key -File $localPath | Out-Null
+                $downloaded++
+                
+                if ($downloaded % 100 -eq 0) {
+                    Write-Host "   -> Downloaded $downloaded images..."
+                }
+            } else {
+                $downloaded++
+            }
+        }
+        
+        Write-Host "   -> Downloaded $downloaded images"
+    }
+    catch {
+        Write-Warning "Failed to download Amazon images: $_"
+        Write-Host "   -> Use Python version for reliable S3 access"
+    }
 }
 
 # --- 4. SEC FINANCIAL STATEMENTS ---
@@ -174,8 +221,21 @@ function Get-SECFinancials {
     param([string]$Mode)
     
     Write-Host "`n[4/5] Fetching SEC Financial Statement Data..."
+    Write-Host "   -> SEC EDGAR: 64 quarters available (2009 Q1 to 2024 Q4)"
     
-    $quarters = if ($Mode -eq 'sample') { @('2024q3') } else { @('2024q3', '2024q2', '2024q1', '2023q4') }
+    # Sample: 1 quarter, All: 20 quarters (5 years)
+    if ($Mode -eq 'sample') {
+        $quarters = @('2024q3')
+    } else {
+        # Last 5 years (20 quarters)
+        $quarters = @()
+        for ($year = 2024; $year -ge 2020; $year--) {
+            $quarters += "$($year)q4"
+            $quarters += "$($year)q3"
+            $quarters += "$($year)q2"
+            $quarters += "$($year)q1"
+        }
+    }
     $headers = @{
         'User-Agent' = 'Mozilla/5.0 Enterprise-NAS-Test contact@example.com'
     }

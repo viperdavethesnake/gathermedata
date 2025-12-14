@@ -42,6 +42,7 @@ pip install -r requirements.txt
 
 ### Using Tiers (Recommended)
 
+**Python:**
 ```bash
 # List all available tiers
 python download_govdocs.py --list
@@ -49,33 +50,63 @@ python download_govdocs.py --list
 # Download sample tier (10,000 files)
 python download_govdocs.py --tier sample
 
-# Download complete corpus (986,000 files)
-python download_govdocs.py --tier complete
+# Download complete corpus (986,000 files) with 8 parallel downloads
+python download_govdocs.py --tier complete --parallel 8
 
 # With custom path
 python download_govdocs.py --tier medium --path /mnt/nas/govdocs
 ```
 
+**PowerShell (Windows):**
+```powershell
+# List all available tiers
+.\download_govdocs.ps1 -List
+
+# Download sample tier
+.\download_govdocs.ps1 -Tier sample
+
+# Download complete corpus with 8 parallel downloads
+.\download_govdocs.ps1 -Tier complete -Parallel 8
+
+# With custom path
+.\download_govdocs.ps1 -Tier medium -Path "D:\GovDocs1"
+```
+
 ### Custom Thread Range
 
+**Python:**
 ```bash
 # Download first 100 threads
 python download_govdocs.py --threads 100
 
-# Resume: Download threads 100-199
-python download_govdocs.py --threads 100 --start 100
+# Resume: Download threads 100-199 with 8 parallel workers
+python download_govdocs.py --threads 100 --start 100 --parallel 8
 
 # Download specific range: threads 500-599
 python download_govdocs.py --threads 100 --start 500
 ```
 
+**PowerShell:**
+```powershell
+# Download first 100 threads
+.\download_govdocs.ps1 -Threads 100
+
+# Resume: Download threads 100-199 with 8 parallel jobs
+.\download_govdocs.ps1 -Threads 100 -Start 100 -Parallel 8
+
+# Download specific range
+.\download_govdocs.ps1 -Threads 100 -Start 500
+```
+
 ## Default Paths
 
-| Platform | Default Path |
-|----------|-------------|
-| Linux | `/storage/nexus/GovDocs1` |
-| macOS | `~/Downloads/GovDocs1` |
-| Windows | `S:\GovDocs1` |
+| Platform | Script | Default Path |
+|----------|--------|-------------|
+| Linux | Python | `/storage/nexus/GovDocs1` |
+| macOS | Python | `~/Downloads/GovDocs1` |
+| Windows | PowerShell | `S:\GovDocs1` |
+
+Override with `--path` (Python) or `-Path` (PowerShell)
 
 ## Resume Capability
 

@@ -114,16 +114,22 @@ python data_loader.py --mode sample --path /Users/yourname/Desktop/TestData
 ## Estimated Download Sizes
 
 ### Sample Mode
-- Download: ~2 GB
-- Storage: ~1.5 GB (varies by filesystem)
-- Time: ~5-10 minutes (depends on connection)
-- Files: ~1,230
+- Download: ~8 GB
+- Storage: ~6 GB (varies by filesystem)
+- Time: ~10-20 minutes (depends on connection)
+- Files: ~12,000+
 
 ### All Mode
-- Download: ~30 GB
-- Storage: ~26 GB
-- Time: ~30-60 minutes (depends on connection)
-- Files: ~2,750
+- Download: ~588 GB
+- Storage: ~300-588 GB (depends on compression)
+- Time: 6-12 hours (depends on connection)
+- Files: ~1 million+
+
+### GovDocs1-Only (Separate Script)
+See [README_GOVDOCS.md](README_GOVDOCS.md) for 7 tiers:
+- Tiny: 540 MB (1K files)
+- Sample: 5.4 GB (10K files)
+- Complete: 540 GB (986K files)
 
 ## macOS-Specific Tips
 

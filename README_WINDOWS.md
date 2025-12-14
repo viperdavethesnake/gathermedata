@@ -54,29 +54,44 @@ Install-Module -Name AWS.Tools.S3 -Force
 
 ## Usage
 
-### Download Sample Data (~2 GB)
+### Download Sample Data (~8 GB)
 
 ```powershell
 .\data_loader.ps1 -Mode sample
 ```
 
-### Download Full Dataset (~30 GB)
+### Download Full Dataset (~588 GB)
 
 ```powershell
+# Default path: S:\Shared
 .\data_loader.ps1 -Mode all
+
+# Custom path
+.\data_loader.ps1 -Mode all -Path "D:\TestData"
 ```
 
-### Change Download Location
+### GovDocs1-Only Downloader
 
-Edit the `$BaseDir` variable in `data_loader.ps1`:
+For granular control over GovDocs1 downloads (7 tiers from 540 MB to 540 GB):
 
 ```powershell
-$BaseDir = "D:\MyData"  # Change from S:\Shared
+# List available tiers
+.\download_govdocs.ps1 -List
+
+# Download sample tier (10K files, 5 GB)
+.\download_govdocs.ps1 -Tier sample
+
+# Complete corpus with 8 parallel downloads
+.\download_govdocs.ps1 -Tier complete -Parallel 8
+
+# Custom thread range
+.\download_govdocs.ps1 -Threads 100 -Start 50 -Path "D:\GovDocs1"
 ```
 
-## Default Download Location
+## Default Download Locations
 
-**Default**: `S:\Shared`
+**data_loader.ps1**: `S:\Shared` (override with `-Path`)
+**download_govdocs.ps1**: `S:\GovDocs1` (override with `-Path`)
 
 The script creates subdirectories:
 - `S:\Shared\1_Office_Docs_GovDocs`

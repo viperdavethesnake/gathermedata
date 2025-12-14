@@ -12,6 +12,8 @@ import zipfile
 import io
 import argparse
 import time
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
 # --- CONFIGURATION ---
@@ -86,17 +88,56 @@ def retry_download(func):
         return None
     return wrapper
 
-def download_govdocs(base_dir, num_threads, start_thread=0):
+def download_single_thread(thread_num, base_dir):
+    """Download a single GovDocs1 thread"""
+    thread_id = f"{thread_num:03d}.zip"
+    url = BASE_URL + thread_id
+    thread_dir = os.path.join(base_dir, f"{thread_num:03d}")
+    
+    # Check if already downloaded
+    if os.path.exists(thread_dir) and len(os.listdir(thread_dir)) > 0:
+        return ('skipped', thread_num, 0)
+    
+    @retry_download
+    def fetch_thread():
+        r = requests.get(url, stream=True, timeout=120)
+        if r.status_code == 200:
+            total_size = int(r.headers.get('content-length', 0))
+            
+            # Download to memory
+            content = io.BytesIO()
+            for chunk in r.iter_content(chunk_size=8192):
+                content.write(chunk)
+            
+            # Extract
+            content.seek(0)
+            z = zipfile.ZipFile(content)
+            z.extractall(thread_dir)
+            
+            file_count = len(z.namelist())
+            return file_count
+        else:
+            return None
+    
+    result = fetch_thread()
+    if result:
+        return ('success', thread_num, result)
+    else:
+        return ('failed', thread_num, 0)
+
+def download_govdocs(base_dir, num_threads, start_thread=0, parallel_workers=4):
     """
-    Download GovDocs1 threads
+    Download GovDocs1 threads with parallel processing
     
     Args:
         base_dir: Base directory for downloads
         num_threads: Number of threads to download
         start_thread: Starting thread number (for resume capability)
+        parallel_workers: Number of parallel downloads (default: 4)
     """
     print(f"\nDownloading GovDocs1 Corpus")
     print(f"  Threads: {start_thread} to {start_thread + num_threads - 1}")
+    print(f"  Parallel workers: {parallel_workers}")
     print(f"  Target: {base_dir}")
     print()
     
@@ -106,54 +147,28 @@ def download_govdocs(base_dir, num_threads, start_thread=0):
     failed = 0
     skipped = 0
     
-    with tqdm(total=num_threads, desc="Overall Progress", unit="thread") as overall_pbar:
-        for i in range(start_thread, start_thread + num_threads):
-            thread_id = f"{i:03d}.zip"
-            url = BASE_URL + thread_id
-            thread_dir = os.path.join(base_dir, f"{i:03d}")
-            
-            # Check if already downloaded
-            if os.path.exists(thread_dir) and len(os.listdir(thread_dir)) > 0:
-                print(f"   -> Thread {thread_id}: Already downloaded (skipping)")
-                skipped += 1
-                overall_pbar.update(1)
-                continue
-            
-            print(f"   -> Downloading Thread {thread_id}...")
-            
-            @retry_download
-            def fetch_thread():
-                r = requests.get(url, stream=True, timeout=120)
-                if r.status_code == 200:
-                    total_size = int(r.headers.get('content-length', 0))
-                    
-                    # Download to memory
-                    content = io.BytesIO()
-                    with tqdm(total=total_size, unit='B', unit_scale=True, 
-                             desc=f"      {thread_id}", leave=False) as pbar:
-                        for chunk in r.iter_content(chunk_size=8192):
-                            content.write(chunk)
-                            pbar.update(len(chunk))
-                    
-                    # Extract
-                    content.seek(0)
-                    z = zipfile.ZipFile(content)
-                    z.extractall(thread_dir)
-                    
-                    file_count = len(z.namelist())
-                    print(f"      [+] Extracted {file_count} files to {thread_id[:-4]}/")
-                    return file_count
-                else:
-                    print(f"      [!] HTTP {r.status_code} for thread {thread_id}")
-                    return None
-            
-            result = fetch_thread()
-            if result:
-                successful += 1
-            else:
-                failed += 1
-            
-            overall_pbar.update(1)
+    thread_range = range(start_thread, start_thread + num_threads)
+    
+    with ThreadPoolExecutor(max_workers=parallel_workers) as executor:
+        # Submit all tasks
+        futures = {executor.submit(download_single_thread, i, base_dir): i 
+                   for i in thread_range}
+        
+        # Process results as they complete
+        with tqdm(total=num_threads, desc="Overall Progress", unit="thread") as pbar:
+            for future in as_completed(futures):
+                status, thread_num, file_count = future.result()
+                
+                if status == 'success':
+                    print(f"   ✓ Thread {thread_num:03d}: {file_count} files extracted")
+                    successful += 1
+                elif status == 'skipped':
+                    skipped += 1
+                else:  # failed
+                    print(f"   ✗ Thread {thread_num:03d}: Failed")
+                    failed += 1
+                
+                pbar.update(1)
     
     print(f"\n{'='*60}")
     print(f"DOWNLOAD SUMMARY")
@@ -242,6 +257,12 @@ Examples:
         default=None,
         help='Download path (default: platform-specific)'
     )
+    parser.add_argument(
+        '--parallel',
+        type=int,
+        default=4,
+        help='Number of parallel downloads (default: 4, max recommended: 8)'
+    )
     
     args = parser.parse_args()
     
@@ -297,7 +318,7 @@ Examples:
     
     # Start download
     start_time = time.time()
-    download_govdocs(base_dir, num_threads, args.start)
+    download_govdocs(base_dir, num_threads, args.start, args.parallel)
     elapsed = time.time() - start_time
     
     print(f"\n[*] Total time: {elapsed/60:.1f} minutes")
