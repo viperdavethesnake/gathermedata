@@ -162,10 +162,12 @@ def download_federal_contracts(mode):
 # --- 3. WAREHOUSE IMAGES (Amazon) ---
 def download_amazon_images(mode):
     print("\n[3/4] Starting Amazon Bin Image Download...")
+    print("   -> Amazon Bin Images: 536,434 JPG images available")
     s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
     bucket_name = 'aft-vbi-pds'
     prefix = 'bin-images/'
-    target_count = 50 if mode == 'sample' else 2000
+    # Sample: 50 images, All: 50,000 images (reasonable subset of 536K available)
+    target_count = 50 if mode == 'sample' else 50000
     
     try:
         paginator = s3.get_paginator('list_objects_v2')
@@ -199,9 +201,18 @@ def download_amazon_images(mode):
 # Each quarter contains multiple CSV files with balance sheet, income statement, cash flow data
 def download_sec_financials(mode):
     print("\n[4/4] Fetching SEC Financial Statement Data...")
+    print("   -> SEC EDGAR: 64 quarters available (2009 Q1 to 2024 Q4)")
     
-    # Download 1 quarter for sample, 4 quarters for all
-    quarters = ['2024q3'] if mode == 'sample' else ['2024q3', '2024q2', '2024q1', '2023q4']
+    # Download 1 quarter for sample, 20 quarters for all (5 years of data)
+    if mode == 'sample':
+        quarters = ['2024q3']
+    else:
+        # Last 5 years (20 quarters)
+        quarters = []
+        for year in range(2024, 2019, -1):
+            for q in ['q4', 'q3', 'q2', 'q1']:
+                quarters.append(f"{year}{q}")
+        quarters = quarters[:20]  # Trim to exactly 20
     
     headers = {
         'User-Agent': 'Mozilla/5.0 Enterprise-NAS-Test contact@example.com'

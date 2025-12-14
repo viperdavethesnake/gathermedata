@@ -56,11 +56,11 @@ python data_loader.py --mode all --path /mnt/nas/testdata
 | Windows (Python) | `S:\Shared` |
 | Windows (PowerShell) | `S:\Shared` |
 
-### Platform-Specific Documentation
+### Additional Documentation
 
-- **Linux**: This README
 - **macOS**: See [README_MACOS.md](README_MACOS.md)
 - **Windows**: See [README_WINDOWS.md](README_WINDOWS.md)
+- **GovDocs1 Only**: See [README_GOVDOCS.md](README_GOVDOCS.md) - Dedicated downloader with 7 tiers
 
 ## Features
 
@@ -72,8 +72,15 @@ python data_loader.py --mode all --path /mnt/nas/testdata
 
 ## Storage Requirements
 
-- Sample mode: ~2 GB download, ~1.5 GB storage
-- All mode: ~560 GB download, ~270-560 GB storage (depends on filesystem compression)
-  - GovDocs1 alone: ~540 GB (1000 threads × ~540 MB average)
-  - With ZFS zstd compression: ~270 GB physical storage
+### Main Data Loader (`data_loader.py`)
+- Sample mode: ~8 GB download, ~6 GB storage
+- All mode: ~588 GB download, ~300-588 GB storage
+  - GovDocs1: ~540 GB (1000 threads)
+  - Amazon Images: ~27 GB (50,000 images)
+  - SEC Financials: ~12 GB (20 quarters)
+  - Federal Register: ~4 GB (10,000 PDFs)
+  - Federal Contracts: <1 MB (JSON metadata)
+
+### GovDocs1 Only (`download_govdocs.py`)
+See [README_GOVDOCS.md](README_GOVDOCS.md) for 7 download tiers from 540 MB to 540 GB
 
