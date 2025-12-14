@@ -73,5 +73,7 @@ python data_loader.py --mode all --path /mnt/nas/testdata
 ## Storage Requirements
 
 - Sample mode: ~2 GB download, ~1.5 GB storage
-- All mode: ~30 GB download, ~13-26 GB storage (depends on filesystem compression)
+- All mode: ~560 GB download, ~270-560 GB storage (depends on filesystem compression)
+  - GovDocs1 alone: ~540 GB (1000 threads × ~540 MB average)
+  - With ZFS zstd compression: ~270 GB physical storage
 
