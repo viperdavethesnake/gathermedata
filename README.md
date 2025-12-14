@@ -2,6 +2,8 @@
 
 Collection of scripts for downloading real-world data from public repositories for NAS testing, forensics research, and data science.
 
+**🚀 Quick Start:** See [HOWTO.md](HOWTO.md) for copy/paste commands
+
 ## Data Sources
 
 1. **Office Documents**: GovDocs1 - Real government files (DOC, PDF, PPT, XLS, HTML)
