@@ -247,75 +247,101 @@ def download_sec_financials(mode):
 # --- 5. REGULATORY DOCUMENTS (Federal Register) ---
 # Real federal agency rules, proposed rules, and notices (PDFs)
 # Excludes presidential documents per requirements
+# API provides up to 10,000 documents per type (30,000 total available)
 def download_federal_register(mode):
     print("\n[5/5] Fetching Federal Register Documents...")
     api_url = "https://www.federalregister.gov/api/v1/documents.json"
-    limit = 50 if mode == 'sample' else 200
+    
+    # Sample: 200 docs, All: 5000 docs (reasonable subset of 30K available)
+    limit = 200 if mode == 'sample' else 5000
     
     # Document types to include (excluding Presidential Documents)
     doc_types = ['RULE', 'PRORULE', 'NOTICE']
     
     downloaded = 0
+    per_page = 100  # Max per request
+    
+    print(f"   -> Target: {limit} documents (30,000+ available in Federal Register)")
     
     with tqdm(total=limit, desc="   Regulatory PDFs") as pbar:
         for doc_type in doc_types:
             if downloaded >= limit:
                 break
             
-            params = {
-                'per_page': 20,
-                'order': 'newest',
-                'conditions[type][]': doc_type,
-                'fields[]': ['title', 'document_number', 'pdf_url', 'type']
-            }
+            page = 1
+            docs_for_this_type = 0
             
-            @retry_download
-            def fetch_docs():
-                return requests.get(api_url, params=params, timeout=30)
-            
-            response = fetch_docs()
-            if not response or response.status_code != 200:
-                continue
-            
-            data = response.json()
-            results = data.get('results', [])
-            
-            for doc in results:
+            while downloaded < limit:
+                params = {
+                    'per_page': per_page,
+                    'page': page,
+                    'order': 'newest',
+                    'conditions[type][]': doc_type,
+                    'fields[]': ['title', 'document_number', 'pdf_url', 'type']
+                }
+                
+                @retry_download
+                def fetch_docs():
+                    return requests.get(api_url, params=params, timeout=30)
+                
+                response = fetch_docs()
+                if not response or response.status_code != 200:
+                    break
+                
+                data = response.json()
+                results = data.get('results', [])
+                
+                if not results:  # No more results for this type
+                    break
+                
+                for doc in results:
+                    if downloaded >= limit:
+                        break
+                    
+                    pdf_url = doc.get('pdf_url')
+                    doc_num = doc.get('document_number', f'doc_{downloaded}')
+                    
+                    if not pdf_url:
+                        continue
+                    
+                    # Sanitize filename
+                    safe_name = "".join(c for c in doc_num if c.isalnum() or c in ('-', '_'))
+                    local_path = os.path.join(DIRS["REGULATORY"], f"{safe_name}.pdf")
+                    
+                    if os.path.exists(local_path):
+                        downloaded += 1
+                        docs_for_this_type += 1
+                        pbar.update(1)
+                        continue
+                    
+                    @retry_download
+                    def fetch_pdf():
+                        r = requests.get(pdf_url, stream=True, timeout=30)
+                        if r.status_code == 200:
+                            with open(local_path, 'wb') as f:
+                                for chunk in r.iter_content(chunk_size=8192):
+                                    f.write(chunk)
+                            return True
+                        return None
+                    
+                    if fetch_pdf():
+                        downloaded += 1
+                        docs_for_this_type += 1
+                        pbar.update(1)
+                    
+                    # Delay to avoid rate limiting (API is generous but we respect it)
+                    time.sleep(0.2)
+                
                 if downloaded >= limit:
                     break
                 
-                pdf_url = doc.get('pdf_url')
-                doc_num = doc.get('document_number', f'doc_{downloaded}')
-                
-                if not pdf_url:
-                    continue
-                
-                # Sanitize filename
-                safe_name = "".join(c for c in doc_num if c.isalnum() or c in ('-', '_'))
-                local_path = os.path.join(DIRS["REGULATORY"], f"{safe_name}.pdf")
-                
-                if os.path.exists(local_path):
-                    downloaded += 1
-                    pbar.update(1)
-                    continue
-                
-                @retry_download
-                def fetch_pdf():
-                    r = requests.get(pdf_url, stream=True, timeout=30)
-                    if r.status_code == 200:
-                        with open(local_path, 'wb') as f:
-                            for chunk in r.iter_content(chunk_size=8192):
-                                f.write(chunk)
-                        return True
-                    return None
-                
-                if fetch_pdf():
-                    downloaded += 1
-                    pbar.update(1)
-                
-                time.sleep(0.1)
+                # Move to next page
+                page += 1
+                time.sleep(0.5)  # Extra delay between pages
+            
+            print(f"      [+] Downloaded {docs_for_this_type} {doc_type} documents")
     
-    print(f"   -> Downloaded {downloaded} regulatory documents")
+    print(f"   -> Downloaded {downloaded} regulatory documents total")
 
 def get_dir_size(path):
     """Calculate total size of directory"""

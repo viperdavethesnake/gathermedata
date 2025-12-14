@@ -13,6 +13,7 @@ Downloads real-world data from public repositories for NAS testing environments.
    - Multiple CSV files per quarter
 5. **Regulatory Documents**: Federal Register - Agency rules and notices (PDF)
    - Final rules, proposed rules, public notices from federal agencies
+   - 30,000+ documents available (sample: 200, all: 5,000)
    - Daily updates, excludes presidential documents
 
 ## Setup
