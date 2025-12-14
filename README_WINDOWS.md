@@ -4,7 +4,7 @@ Downloads real-world data from public repositories for NAS testing environments.
 
 ## Requirements
 
-- **PowerShell 7.0 or later** (tested on 7.5.0)
+- **PowerShell 7.0 or later** (latest: 7.5.4)
 - Windows 10/11 or Windows Server 2019+
 - Internet connection
 - ~30 GB free space (for sample mode: ~2 GB)

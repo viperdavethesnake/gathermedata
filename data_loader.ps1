@@ -3,7 +3,7 @@
     Enterprise NAS Data Loader - PowerShell Version
 .DESCRIPTION
     Downloads real-world data from public repositories for testing.
-    Requires PowerShell 7.0 or later.
+    Requires PowerShell 7.0 or later (latest: 7.5.4).
 .PARAMETER Mode
     Download mode: 'sample' (small batch) or 'all' (large batch)
 .EXAMPLE
