@@ -33,12 +33,33 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-# Download sample data (~5-10GB)
+# Download sample data (~2 GB) - uses platform default path
 python data_loader.py --mode sample
 
-# Download full datasets (100GB+)
+# Download full datasets (~30 GB)
 python data_loader.py --mode all
+
+# Specify custom download path
+python data_loader.py --mode sample --path /your/custom/path
+
+# Example with custom path
+python data_loader.py --mode all --path /mnt/nas/testdata
 ```
+
+### Default Paths by Platform
+
+| Platform | Default Path |
+|----------|-------------|
+| Linux | `/storage/nexus` |
+| macOS | `~/Downloads/EnterpriseData` |
+| Windows (Python) | `S:\Shared` |
+| Windows (PowerShell) | `S:\Shared` |
+
+### Platform-Specific Documentation
+
+- **Linux**: This README
+- **macOS**: See [README_MACOS.md](README_MACOS.md)
+- **Windows**: See [README_WINDOWS.md](README_WINDOWS.md)
 
 ## Features
 
@@ -50,6 +71,6 @@ python data_loader.py --mode all
 
 ## Storage Requirements
 
-- Sample mode: ~5-10 GB
-- All mode: 100+ GB (potentially 500GB+)
+- Sample mode: ~2 GB download, ~1.5 GB storage
+- All mode: ~30 GB download, ~13-26 GB storage (depends on filesystem compression)
 

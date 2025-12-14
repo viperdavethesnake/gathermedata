@@ -17,17 +17,25 @@ import threading
 from tqdm import tqdm
 
 # --- CONFIGURATION ---
-BASE_DIR = "/storage/nexus"
-DIRS = {
-    "OFFICE": os.path.join(BASE_DIR, "1_Office_Docs_GovDocs"),
-    "FINANCE": os.path.join(BASE_DIR, "2_Federal_Contracts_USASpending"),
-    "WAREHOUSE_IMG": os.path.join(BASE_DIR, "3_Warehouse_Images_Amazon"),
-    "WAREHOUSE_LOGS": os.path.join(BASE_DIR, "4_Financial_Statements_SEC"),
-    "REGULATORY": os.path.join(BASE_DIR, "5_Regulatory_Docs_FederalRegister"),
+# Default paths by platform
+DEFAULT_PATHS = {
+    'linux': '/storage/nexus',
+    'darwin': os.path.expanduser('~/Downloads/EnterpriseData'),  # macOS
+    'win32': 'S:\\Shared'  # Windows (if running Python on Windows)
 }
 
 MAX_RETRIES = 3
 RETRY_DELAY = 2
+
+def get_dirs(base_dir):
+    """Create directory structure based on base path"""
+    return {
+        "OFFICE": os.path.join(base_dir, "1_Office_Docs_GovDocs"),
+        "FINANCE": os.path.join(base_dir, "2_Federal_Contracts_USASpending"),
+        "WAREHOUSE_IMG": os.path.join(base_dir, "3_Warehouse_Images_Amazon"),
+        "WAREHOUSE_LOGS": os.path.join(base_dir, "4_Financial_Statements_SEC"),
+        "REGULATORY": os.path.join(base_dir, "5_Regulatory_Docs_FederalRegister"),
+    }
 
 def retry_download(func):
     """Decorator for retrying downloads on failure"""
@@ -350,13 +358,29 @@ if __name__ == "__main__":
         default='sample',
         help='Download mode: sample (small batch) or all (large batch)'
     )
+    parser.add_argument(
+        '--path',
+        type=str,
+        default=None,
+        help='Download path (default: platform-specific - Linux: /storage/nexus, macOS: ~/Downloads/EnterpriseData, Windows: S:\\Shared)'
+    )
     args = parser.parse_args()
+    
+    # Determine base directory
+    if args.path:
+        BASE_DIR = os.path.abspath(os.path.expanduser(args.path))
+    else:
+        BASE_DIR = DEFAULT_PATHS.get(sys.platform, DEFAULT_PATHS['linux'])
+    
+    # Create directory structure
+    DIRS = get_dirs(BASE_DIR)
     
     print("="*60)
     print("ENTERPRISE DATA LOADER")
     print("="*60)
     print(f"Mode: {args.mode.upper()}")
-    print(f"Target: {os.path.abspath(BASE_DIR)}")
+    print(f"Platform: {sys.platform}")
+    print(f"Target: {BASE_DIR}")
     print("="*60)
     
     # Create directories
