@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """
-Digital Corpora Downloader - Downloads forensic scenarios and file corpora
+Digital Corpora Scenarios Downloader - Downloads forensic scenarios and file corpora
 Source: https://digitalcorpora.org
 
 Includes:
 - Forensic Scenarios (disk images, network captures, memory dumps)
-- File Corpora (PDFs, audio, video, and other file types)
-- SAFEDOCS and UNSAFE-DOCS collections
+- Small File Corpora (PDFs, audio, video, and other file types)
+
+For massive PDF collections use dedicated scripts:
+- GovDocs1 (986K files): use download_govdocs.py
+- SAFEDOCS (8M PDFs): use download_safedocs.py
+- UNSAFE-DOCS (5.3M+ files): use download_unsafedocs.py
 """
 import os
 import sys
@@ -75,7 +79,7 @@ SCENARIOS = {
     }
 }
 
-# File Corpora (excluding govdocs1 - use dedicated script)
+# File Corpora (excluding GovDocs1, SAFEDOCS, UNSAFE-DOCS - use dedicated scripts)
 FILE_CORPORA = {
     '2008-pdfs': {
         'name': '2008 PDFs Collection',
@@ -104,21 +108,9 @@ FILE_CORPORA = {
     }
 }
 
-# Large PDF corpora (MASSIVE - separate options)
-LARGE_CORPORA = {
-    'CC-MAIN-2021-31-PDF-UNTRUNCATED': {
-        'name': 'SAFEDOCS',
-        'description': '8 million PDFs from Common Crawl',
-        'size': 'Several TB',
-        'files': '~8M'
-    },
-    'CC-MAIN-2021-31-UNSAFE': {
-        'name': 'UNSAFE-DOCS',
-        'description': '5.3M PDFs + 180K other files',
-        'size': 'Several TB',
-        'files': '~5.5M'
-    }
-}
+# Note: SAFEDOCS and UNSAFE-DOCS moved to dedicated scripts:
+# - download_safedocs.py (8M PDFs, 8 tiers)
+# - download_unsafedocs.py (5.3M+ files, 8 tiers)
 
 def retry_download(func):
     """Decorator for retrying downloads on failure"""

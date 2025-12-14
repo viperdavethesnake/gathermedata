@@ -1,11 +1,15 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    Digital Corpora Downloader - PowerShell version for Windows
+    Digital Corpora Scenarios Downloader - PowerShell version for Windows
 
 .DESCRIPTION
     Downloads forensic scenarios and file corpora from digitalcorpora.org
-    Includes scenarios, file corpora, SAFEDOCS, and UNSAFE-DOCS
+    
+    For massive file collections use dedicated scripts:
+    - GovDocs1 (986K files): use download_govdocs.ps1
+    - SAFEDOCS (8M PDFs): use download_safedocs.ps1
+    - UNSAFE-DOCS (5.3M+ files): use download_unsafedocs.ps1
 
 .PARAMETER ListScenarios
     List all available forensic scenarios
@@ -139,20 +143,9 @@ $FileCorpora = @{
     }
 }
 
-$LargeCorpora = @{
-    'CC-MAIN-2021-31-PDF-UNTRUNCATED' = @{
-        Name = 'SAFEDOCS'
-        Description = '8 million PDFs from Common Crawl'
-        Size = 'Several TB'
-        Files = '~8M'
-    }
-    'CC-MAIN-2021-31-UNSAFE' = @{
-        Name = 'UNSAFE-DOCS'
-        Description = '5.3M PDFs + 180K other files'
-        Size = 'Several TB'
-        Files = '~5.5M'
-    }
-}
+# Note: SAFEDOCS and UNSAFE-DOCS moved to dedicated scripts:
+# - download_safedocs.ps1 (8M PDFs, 8 tiers)
+# - download_unsafedocs.ps1 (5.3M+ files, 8 tiers)
 
 function Show-Scenarios {
     Write-Host "`n================================================================" -ForegroundColor Cyan

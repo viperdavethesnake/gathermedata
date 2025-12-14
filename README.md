@@ -134,9 +134,16 @@ python download_govdocs.py --tier complete --path /storage/govdocs
 ### GovDocs1 Only (`download_govdocs.py`)
 See [README_GOVDOCS.md](README_GOVDOCS.md) for 7 download tiers from 540 MB to 540 GB
 
-### Digital Corpora (`download_digitalcorpora.py`)
-See [README_DIGITALCORPORA.md](README_DIGITALCORPORA.md) for forensic scenarios and file corpora:
+### Digital Corpora Scenarios (`download_digitalcorpora_scenarios.py`)
+See [README_DIGITALCORPORA.md](README_DIGITALCORPORA.md) for forensic scenarios and small file corpora:
 - **7 Forensic Scenarios**: Complete investigation scenarios (25-223 GB each)
-- **5 File Corpora**: PDFs, audio, video, media collections
-- **2 Large PDF Corpora**: SAFEDOCS (8M PDFs), UNSAFE-DOCS (5.5M files)
+- **5 Small File Corpora**: PDFs, audio, video, media collections
+
+### SAFEDOCS (`download_safedocs.py`)
+- **8 tiers**: tiny (1K, 100 MB) → complete (8M PDFs, 800 GB)
+- Common Crawl PDF collection (CC-MAIN-2021-31-PDF-UNTRUNCATED)
+
+### UNSAFE-DOCS (`download_unsafedocs.py`)
+- **8 tiers**: tiny (1K, 120 MB) → complete (5.3M+ files, 650 GB)
+- Common Crawl mixed files (CC-MAIN-2021-31-UNSAFE)
 

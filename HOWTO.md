@@ -121,66 +121,66 @@ Downloads forensic scenarios with disk images, memory dumps, and network capture
 ### Option 1: List Available Content
 ```bash
 # Linux/macOS - List all scenarios
-python download_digitalcorpora.py --list-scenarios
+python download_digitalcorpora_scenarios.py --list-scenarios
 
 # Linux/macOS - List all file corpora
-python download_digitalcorpora.py --list-corpora
+python download_digitalcorpora_scenarios.py --list-corpora
 
 # Windows PowerShell
-.\download_digitalcorpora.ps1 -ListScenarios
-.\download_digitalcorpora.ps1 -ListCorpora
+.\download_digitalcorpora_scenarios.ps1 -ListScenarios
+.\download_digitalcorpora_scenarios.ps1 -ListCorpora
 ```
 
 ### Option 2: Download Small Scenario (25 GB)
 ```bash
 # Linux/macOS - Starter scenario
-python download_digitalcorpora.py --scenario 2008-nitroba
+python download_digitalcorpora_scenarios.py --scenario 2008-nitroba
 
 # Linux/macOS - With 8 parallel downloads
-python download_digitalcorpora.py --scenario 2008-nitroba --parallel 8
+python download_digitalcorpora_scenarios.py --scenario 2008-nitroba --parallel 8
 
 # Windows PowerShell
-.\download_digitalcorpora.ps1 -Scenario "2008-nitroba" -Parallel 8
+.\download_digitalcorpora_scenarios.ps1 -Scenario "2008-nitroba" -Parallel 8
 ```
 
 ### Option 3: Download Medium Scenarios (79-112 GB)
 ```bash
 # Linux/macOS - Lone Wolf scenario (79 GB)
-python download_digitalcorpora.py --scenario 2018-lonewolf --parallel 8
+python download_digitalcorpora_scenarios.py --scenario 2018-lonewolf --parallel 8
 
 # Linux/macOS - National Gallery DC (112 GB)
-python download_digitalcorpora.py --scenario 2012-ngdc --parallel 8 --path /mnt/forensics
+python download_digitalcorpora_scenarios.py --scenario 2012-ngdc --parallel 8 --path /mnt/forensics
 
 # Windows PowerShell
-.\download_digitalcorpora.ps1 -Scenario "2018-lonewolf" -Parallel 8
+.\download_digitalcorpora_scenarios.ps1 -Scenario "2018-lonewolf" -Parallel 8
 ```
 
 ### Option 4: Download File Corpus
 ```bash
 # Linux/macOS - Audio files
-python download_digitalcorpora.py --corpus 2009-audio
+python download_digitalcorpora_scenarios.py --corpus 2009-audio
 
 # Linux/macOS - Media with limit
-python download_digitalcorpora.py --corpus media1 --limit 1000 --parallel 8
+python download_digitalcorpora_scenarios.py --corpus media1 --limit 1000 --parallel 8
 
 # Linux/macOS - Large PDF corpus subset
-python download_digitalcorpora.py --corpus CC-MAIN-2021-31-PDF-UNTRUNCATED --limit 10000 --parallel 8
+python download_digitalcorpora_scenarios.py --corpus CC-MAIN-2021-31-PDF-UNTRUNCATED --limit 10000 --parallel 8
 
 # Windows PowerShell
-.\download_digitalcorpora.ps1 -Corpus "2009-audio"
-.\download_digitalcorpora.ps1 -Corpus "media1" -Limit 1000
+.\download_digitalcorpora_scenarios.ps1 -Corpus "2009-audio"
+.\download_digitalcorpora_scenarios.ps1 -Corpus "media1" -Limit 1000
 ```
 
 ### Option 5: Download Large Scenario (150-223 GB)
 ```bash
 # Linux/macOS - Narcos scenario (153 GB) - Use screen!
 screen -S narcos
-python download_digitalcorpora.py --scenario 2019-narcos --parallel 8
+python download_digitalcorpora_scenarios.py --scenario 2019-narcos --parallel 8
 # Detach: Ctrl+A then D
 
 # Linux/macOS - Owl scenario (223 GB) - Largest scenario
 screen -S owl
-python download_digitalcorpora.py --scenario 2019-owl --parallel 8 --path /storage/forensics
+python download_digitalcorpora_scenarios.py --scenario 2019-owl --parallel 8 --path /storage/forensics
 # Detach: Ctrl+A then D
 ```
 
@@ -200,14 +200,14 @@ python download_govdocs.py --tier tiny
 # Medium-sized datasets for thorough testing
 python download_enterprise_sources.py --mode sample
 python download_govdocs.py --tier medium --parallel 8
-python download_digitalcorpora.py --scenario 2008-nitroba
+python download_digitalcorpora_scenarios.py --scenario 2008-nitroba
 ```
 
 ### Use Case 3: Forensics Research (~200 GB)
 ```bash
 # Focus on forensic scenarios
-python download_digitalcorpora.py --scenario 2018-lonewolf --parallel 8
-python download_digitalcorpora.py --scenario 2012-ngdc --parallel 8
+python download_digitalcorpora_scenarios.py --scenario 2018-lonewolf --parallel 8
+python download_digitalcorpora_scenarios.py --scenario 2012-ngdc --parallel 8
 python download_govdocs.py --tier small
 ```
 
@@ -216,7 +216,7 @@ python download_govdocs.py --tier small
 # All scripts to /storage/nexus (organized in subfolders)
 python download_enterprise_sources.py --mode all --path /storage/nexus
 python download_govdocs.py --tier complete --parallel 8 --path /storage/nexus
-python download_digitalcorpora.py --scenario 2019-owl --parallel 8 --path /storage/nexus
+python download_digitalcorpora_scenarios.py --scenario 2019-owl --parallel 8 --path /storage/nexus
 
 # Results in:
 # /storage/nexus/

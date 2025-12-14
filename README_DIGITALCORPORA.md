@@ -1,13 +1,17 @@
-# Digital Corpora Downloader
+# Digital Corpora Scenarios Downloader
 
-Dedicated script for downloading forensic scenarios and file corpora from [DigitalCorpora.org](https://digitalcorpora.org).
+Dedicated script for downloading forensic scenarios and small file corpora from [DigitalCorpora.org](https://digitalcorpora.org).
+
+**Note:** For massive file collections, use dedicated scripts:
+- **GovDocs1** (986K files): use `download_govdocs.*`
+- **SAFEDOCS** (8M PDFs): use `download_safedocs.*`
+- **UNSAFE-DOCS** (5.3M+ files): use `download_unsafedocs.*`
 
 ## About Digital Corpora
 
 Digital Corpora provides forensic research data including:
 - **Forensic Scenarios**: Complete incident simulations with disk images, memory dumps, and network captures
-- **File Corpora**: Collections of various file types (PDFs, audio, video, media)
-- **SAFEDOCS & UNSAFE-DOCS**: Massive PDF collections from Common Crawl
+- **Small File Corpora**: Collections of various file types (PDFs, audio, video, media)
 
 All data is freely available for research and education, sponsored by the AWS Open Data Program.
 
@@ -69,19 +73,19 @@ Install-Module -Name AWS.Tools.S3 -Force
 **Python:**
 ```bash
 # List all forensic scenarios
-python download_digitalcorpora.py --list-scenarios
+python download_digitalcorpora_scenarios.py --list-scenarios
 
 # List all file corpora
-python download_digitalcorpora.py --list-corpora
+python download_digitalcorpora_scenarios.py --list-corpora
 ```
 
 **PowerShell:**
 ```powershell
 # List all forensic scenarios
-.\download_digitalcorpora.ps1 -ListScenarios
+.\download_digitalcorpora_scenarios.ps1 -ListScenarios
 
 # List all file corpora
-.\download_digitalcorpora.ps1 -ListCorpora
+.\download_digitalcorpora_scenarios.ps1 -ListCorpora
 ```
 
 ### Download Forensic Scenarios
@@ -89,22 +93,22 @@ python download_digitalcorpora.py --list-corpora
 **Python:**
 ```bash
 # Download a scenario
-python download_digitalcorpora.py --scenario 2018-lonewolf
+python download_digitalcorpora_scenarios.py --scenario 2018-lonewolf
 
 # With custom path and 8 parallel downloads
-python download_digitalcorpora.py --scenario 2019-narcos --path /mnt/nas/forensics --parallel 8
+python download_digitalcorpora_scenarios.py --scenario 2019-narcos --path /mnt/nas/forensics --parallel 8
 
 # Smaller scenario for testing
-python download_digitalcorpora.py --scenario 2008-nitroba
+python download_digitalcorpora_scenarios.py --scenario 2008-nitroba
 ```
 
 **PowerShell:**
 ```powershell
 # Download a scenario
-.\download_digitalcorpora.ps1 -Scenario "2018-lonewolf"
+.\download_digitalcorpora_scenarios.ps1 -Scenario "2018-lonewolf"
 
 # With custom path and parallel downloads
-.\download_digitalcorpora.ps1 -Scenario "2019-narcos" -Path "D:\Forensics" -Parallel 8
+.\download_digitalcorpora_scenarios.ps1 -Scenario "2019-narcos" -Path "D:\Forensics" -Parallel 8
 ```
 
 ### Download File Corpora
@@ -112,22 +116,22 @@ python download_digitalcorpora.py --scenario 2008-nitroba
 **Python:**
 ```bash
 # Download entire corpus
-python download_digitalcorpora.py --corpus 2009-audio
+python download_digitalcorpora_scenarios.py --corpus 2009-audio
 
 # Download with file limit
-python download_digitalcorpora.py --corpus media1 --limit 1000
+python download_digitalcorpora_scenarios.py --corpus media1 --limit 1000
 
 # Large corpus with limit (recommended)
-python download_digitalcorpora.py --corpus CC-MAIN-2021-31-PDF-UNTRUNCATED --limit 10000 --parallel 8
+python download_digitalcorpora_scenarios.py --corpus CC-MAIN-2021-31-PDF-UNTRUNCATED --limit 10000 --parallel 8
 ```
 
 **PowerShell:**
 ```powershell
 # Download corpus
-.\download_digitalcorpora.ps1 -Corpus "2009-audio"
+.\download_digitalcorpora_scenarios.ps1 -Corpus "2009-audio"
 
 # With file limit
-.\download_digitalcorpora.ps1 -Corpus "media1" -Limit 1000
+.\download_digitalcorpora_scenarios.ps1 -Corpus "media1" -Limit 1000
 ```
 
 ## Default Paths
@@ -181,35 +185,35 @@ DigitalCorpora/
 Start with smaller scenarios:
 ```bash
 # Best starter scenario (25 GB)
-python download_digitalcorpora.py --scenario 2008-nitroba
+python download_digitalcorpora_scenarios.py --scenario 2008-nitroba
 
 # Good for testing (79 GB)
-python download_digitalcorpora.py --scenario 2018-lonewolf
+python download_digitalcorpora_scenarios.py --scenario 2018-lonewolf
 ```
 
 ### For Comprehensive Testing
 Medium-sized scenarios:
 ```bash
-python download_digitalcorpora.py --scenario 2012-ngdc  # 112 GB
+python download_digitalcorpora_scenarios.py --scenario 2012-ngdc  # 112 GB
 ```
 
 ### For Advanced Research
 Large, complex scenarios:
 ```bash
-python download_digitalcorpora.py --scenario 2019-owl  # 223 GB
-python download_digitalcorpora.py --scenario 2009-m57-patents  # 150 GB
+python download_digitalcorpora_scenarios.py --scenario 2019-owl  # 223 GB
+python download_digitalcorpora_scenarios.py --scenario 2009-m57-patents  # 150 GB
 ```
 
 ### For File Type Testing
 ```bash
 # Audio files
-python download_digitalcorpora.py --corpus 2009-audio
+python download_digitalcorpora_scenarios.py --corpus 2009-audio
 
 # Video files
-python download_digitalcorpora.py --corpus 2009-video
+python download_digitalcorpora_scenarios.py --corpus 2009-video
 
 # Mixed media
-python download_digitalcorpora.py --corpus media1 --limit 5000
+python download_digitalcorpora_scenarios.py --corpus media1 --limit 5000
 ```
 
 ## Estimated Download Times
@@ -234,7 +238,7 @@ python download_digitalcorpora.py --corpus media1 --limit 5000
 screen -S digitalcorpora
 
 # Run download
-python download_digitalcorpora.py --scenario 2019-narcos --parallel 8
+python download_digitalcorpora_scenarios.py --scenario 2019-narcos --parallel 8
 
 # Detach: Ctrl+A then D
 # Reattach: screen -r digitalcorpora
@@ -243,7 +247,7 @@ python download_digitalcorpora.py --scenario 2019-narcos --parallel 8
 ### Using nohup (Linux/macOS)
 
 ```bash
-nohup python download_digitalcorpora.py --scenario 2019-owl > download.log 2>&1 &
+nohup python download_digitalcorpora_scenarios.py --scenario 2019-owl > download.log 2>&1 &
 tail -f download.log
 ```
 
@@ -251,7 +255,7 @@ tail -f download.log
 
 ```bash
 tmux new -s forensics
-python download_digitalcorpora.py --scenario 2012-ngdc --parallel 8
+python download_digitalcorpora_scenarios.py --scenario 2012-ngdc --parallel 8
 # Detach: Ctrl+B then D
 # Reattach: tmux attach -t forensics
 ```
@@ -261,7 +265,7 @@ python download_digitalcorpora.py --scenario 2012-ngdc --parallel 8
 ### 1. Use Parallel Downloads
 ```bash
 # Increase parallel workers for faster downloads
-python download_digitalcorpora.py --scenario 2018-lonewolf --parallel 8
+python download_digitalcorpora_scenarios.py --scenario 2018-lonewolf --parallel 8
 ```
 
 ### 2. Use Local Storage First
@@ -271,7 +275,7 @@ python download_digitalcorpora.py --scenario 2018-lonewolf --parallel 8
 ### 3. For Large Corpora, Use Limits
 ```bash
 # Don't try to download all 8M PDFs at once
-python download_digitalcorpora.py --corpus CC-MAIN-2021-31-PDF-UNTRUNCATED --limit 100000 --parallel 8
+python download_digitalcorpora_scenarios.py --corpus CC-MAIN-2021-31-PDF-UNTRUNCATED --limit 100000 --parallel 8
 ```
 
 ### 4. Monitor Disk Space

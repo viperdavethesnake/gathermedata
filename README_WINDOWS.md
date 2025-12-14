@@ -95,7 +95,7 @@ For granular control over GovDocs1 downloads (7 tiers from 540 MB to 540 GB):
 
 **download_enterprise_sources.ps1**: `S:\Shared` (override with `-Path`)
 **download_govdocs.ps1**: `S:\GovDocs1` (override with `-Path`)
-**download_digitalcorpora.ps1**: `S:\DigitalCorpora` (override with `-Path`)
+**download_digitalcorpora_scenarios.ps1**: `S:\DigitalCorpora` (override with `-Path`)
 
 The script creates subdirectories:
 - `S:\Shared\1_Office_Docs_GovDocs`

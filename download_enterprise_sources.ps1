@@ -8,7 +8,12 @@
     - SEC financial statements
     - Federal Register documents
     - Federal contracts (USASpending.gov)
-    - GovDocs1 (use download_govdocs.ps1 for more control)
+    
+    For specialized downloads:
+    - GovDocs1: use download_govdocs.ps1 (7 tiers)
+    - SAFEDOCS: use download_safedocs.ps1 (8M PDFs)
+    - UNSAFE-DOCS: use download_unsafedocs.ps1 (5.3M+ files)
+    - Forensic scenarios: use download_digitalcorpora_scenarios.ps1
     
     Requires PowerShell 7.0 or later (latest: 7.5.4).
 .PARAMETER Mode
@@ -39,11 +44,10 @@ if ($Path -notlike "*EnterpriseData*" -and $Path -notlike "*Shared*" -and $Path 
 }
 
 $Dirs = @{
-    OFFICE = Join-Path $BaseDir "1_Office_Docs_GovDocs"
-    FINANCE = Join-Path $BaseDir "2_Federal_Contracts_USASpending"
-    WAREHOUSE_IMG = Join-Path $BaseDir "3_Warehouse_Images_Amazon"
-    WAREHOUSE_LOGS = Join-Path $BaseDir "4_Financial_Statements_SEC"
-    REGULATORY = Join-Path $BaseDir "5_Regulatory_Docs_FederalRegister"
+    FINANCE = Join-Path $BaseDir "1_Federal_Contracts_USASpending"
+    WAREHOUSE_IMG = Join-Path $BaseDir "2_Warehouse_Images_Amazon"
+    WAREHOUSE_LOGS = Join-Path $BaseDir "3_Financial_Statements_SEC"
+    REGULATORY = Join-Path $BaseDir "4_Regulatory_Docs_FederalRegister"
 }
 
 $MaxRetries = 3
@@ -84,53 +88,7 @@ function Invoke-RetryDownload {
     }
 }
 
-# --- 1. OFFICE DOCUMENTS (GovDocs1) ---
-function Get-GovDocs {
-    param(
-        [string]$Mode,
-        [hashtable]$Dirs,
-        [int]$MaxRetries = 3,
-        [int]$RetryDelay = 2
-    )
-    
-    Write-Host "`n[1/5] Starting GovDocs Download (Real Office Files)..."
-    Write-Host "   -> GovDocs1 corpus: ~986,000 files in 1000 ZIP files"
-    
-    $baseUrl = "https://downloads.digitalcorpora.org/corpora/files/govdocs1/zipfiles/"
-    # Sample: 2 threads, All: 1000 threads (complete corpus)
-    $threads = if ($Mode -eq 'all') { 0..999 } else { @(0, 1) }
-    
-    foreach ($i in $threads) {
-        $threadId = "{0:D3}.zip" -f $i
-        $url = $baseUrl + $threadId
-        $extractPath = $Dirs.OFFICE
-        
-        Write-Host "   -> Downloading Thread $threadId..."
-        
-        $result = Invoke-RetryDownload -ScriptBlock {
-            param($url, $extractPath, $threadId)
-            $tempFile = [System.IO.Path]::GetTempFileName()
-            try {
-                Invoke-WebRequest -Uri $url -OutFile $tempFile -TimeoutSec 120
-                
-                # Extract ZIP
-                Expand-Archive -Path $tempFile -DestinationPath $extractPath -Force
-                $fileCount = (Get-ChildItem -Path $extractPath -Recurse -File -ErrorAction SilentlyContinue).Count
-                Write-Host "      [+] Extracted thread $threadId ($fileCount files)"
-                return $true
-            }
-            finally {
-                if (Test-Path $tempFile) {
-                    Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
-                }
-            }
-        } -ArgumentList $url, $extractPath, $threadId -MaxAttempts $MaxRetries -Delay $RetryDelay
-        
-        if ($Mode -eq 'sample') { break }
-    }
-}
-
-# --- 2. FEDERAL CONTRACTS (USASpending.gov) ---
+# --- 1. FEDERAL CONTRACTS (USASpending.gov) ---
 function Get-FederalContracts {
     param(
         [string]$Mode,
@@ -139,7 +97,7 @@ function Get-FederalContracts {
         [int]$RetryDelay = 2
     )
     
-    Write-Host "`n[2/5] Starting Federal Contract Data (USASpending.gov)..."
+    Write-Host "`n[1/4] Starting Federal Contract Data (USASpending.gov)..."
     Write-Host "   -> Downloading structured financial records (JSON format)"
     
     $apiUrl = "https://api.usaspending.gov/api/v2/search/spending_by_award/"
@@ -293,7 +251,7 @@ function Get-SECFinancials {
         [int]$RetryDelay = 2
     )
     
-    Write-Host "`n[4/5] Fetching SEC Financial Statement Data..."
+    Write-Host "`n[3/4] Fetching SEC Financial Statement Data..."
     Write-Host "   -> SEC EDGAR: 64 quarters available (2009 Q1 to 2024 Q4)"
     Write-Host "   -> Note: SEC may return 403 errors due to rate limiting"
     
@@ -361,7 +319,7 @@ function Get-FederalRegister {
         [int]$RetryDelay = 2
     )
     
-    Write-Host "`n[5/5] Fetching Federal Register Documents..."
+    Write-Host "`n[4/4] Fetching Federal Register Documents..."
     
     $apiUrl = "https://www.federalregister.gov/api/v1/documents.json"
     $limit = if ($Mode -eq 'sample') { 200 } else { 10000 }
@@ -480,7 +438,6 @@ Write-Host "============================================================"
 Write-Host "`nStarting downloads...`n"
 
 # Run downloads sequentially (more reliable than parallel in PowerShell)
-Get-GovDocs -Mode $Mode -Dirs $Dirs -MaxRetries $MaxRetries -RetryDelay $RetryDelay
 Get-FederalContracts -Mode $Mode -Dirs $Dirs -MaxRetries $MaxRetries -RetryDelay $RetryDelay
 Get-SECFinancials -Mode $Mode -Dirs $Dirs -MaxRetries $MaxRetries -RetryDelay $RetryDelay
 Get-FederalRegister -Mode $Mode -Dirs $Dirs -MaxRetries $MaxRetries -RetryDelay $RetryDelay

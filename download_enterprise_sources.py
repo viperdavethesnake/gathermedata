@@ -6,11 +6,12 @@ Downloads data from multiple public sources for NAS testing:
 - SEC financial statements
 - Federal Register documents
 - Federal contracts (USASpending.gov)
-- GovDocs1 (use download_govdocs.py for more control)
 
 For specialized downloads:
-- GovDocs1 only: use download_govdocs.py (7 tiers, 1K-986K files)
-- Forensic scenarios: use download_digitalcorpora.py
+- GovDocs1: use download_govdocs.py (7 tiers, 1K-986K files)
+- SAFEDOCS: use download_safedocs.py (8M PDFs, 8 tiers)
+- UNSAFE-DOCS: use download_unsafedocs.py (5.3M+ files, 8 tiers)
+- Forensic scenarios: use download_digitalcorpora_scenarios.py
 """
 import os
 import sys
@@ -39,11 +40,10 @@ RETRY_DELAY = 2
 def get_dirs(base_dir):
     """Create directory structure based on base path"""
     return {
-        "OFFICE": os.path.join(base_dir, "1_Office_Docs_GovDocs"),
-        "FINANCE": os.path.join(base_dir, "2_Federal_Contracts_USASpending"),
-        "WAREHOUSE_IMG": os.path.join(base_dir, "3_Warehouse_Images_Amazon"),
-        "WAREHOUSE_LOGS": os.path.join(base_dir, "4_Financial_Statements_SEC"),
-        "REGULATORY": os.path.join(base_dir, "5_Regulatory_Docs_FederalRegister"),
+        "FINANCE": os.path.join(base_dir, "1_Federal_Contracts_USASpending"),
+        "WAREHOUSE_IMG": os.path.join(base_dir, "2_Warehouse_Images_Amazon"),
+        "WAREHOUSE_LOGS": os.path.join(base_dir, "3_Financial_Statements_SEC"),
+        "REGULATORY": os.path.join(base_dir, "4_Regulatory_Docs_FederalRegister"),
     }
 
 def retry_download(func):
@@ -61,48 +61,11 @@ def retry_download(func):
         return None
     return wrapper
 
-# --- 1. OFFICE DOCS (GovDocs1) ---
-def download_govdocs(mode):
-    print("\n[1/4] Starting GovDocs Download (Real Office Files)...")
-    print("   -> GovDocs1 corpus: ~986,000 files in 1000 ZIP files")
-    base_url = "https://downloads.digitalcorpora.org/corpora/files/govdocs1/zipfiles/"
-    # Sample: 2 threads (~2000 files), All: ALL 1000 threads (~986,000 files)
-    threads = range(1000) if mode == 'all' else [0, 1]
-    
-    for i in threads:
-        thread_id = f"{i:03d}.zip"
-        url = base_url + thread_id
-        print(f"   -> Downloading Thread {thread_id}...")
-        
-        @retry_download
-        def fetch_thread():
-            r = requests.get(url, stream=True, timeout=60)
-            if r.status_code == 200:
-                total_size = int(r.headers.get('content-length', 0))
-                with tqdm(total=total_size, unit='B', unit_scale=True, desc=f"   {thread_id}") as pbar:
-                    content = io.BytesIO()
-                    for chunk in r.iter_content(chunk_size=8192):
-                        content.write(chunk)
-                        pbar.update(len(chunk))
-                    content.seek(0)
-                    z = zipfile.ZipFile(content)
-                    z.extractall(DIRS["OFFICE"])
-                    print(f"      [+] Extracted {len(z.namelist())} files.")
-                return True
-            else:
-                print(f"      [!] Failed to get thread {thread_id} (Status: {r.status_code})")
-                return None
-        
-        fetch_thread()
-        
-        if mode == 'sample':
-            break
-
-# --- 2. FINANCIAL DATA (USASpending.gov Federal Contracts) ---
+# --- 1. FINANCIAL DATA (USASpending.gov Federal Contracts) ---
 # Note: Downloads structured JSON data containing real federal contract information
 # including award amounts, recipients, agencies, dates, and descriptions
 def download_federal_contracts(mode):
-    print("\n[2/4] Starting Federal Contract Data (USASpending.gov)...")
+    print("\n[1/4] Starting Federal Contract Data (USASpending.gov)...")
     print("   -> Downloading structured financial records (JSON format)")
     api_url = "https://api.usaspending.gov/api/v2/search/spending_by_award/"
     limit = 50 if mode == 'sample' else 500
@@ -168,9 +131,9 @@ def download_federal_contracts(mode):
     except Exception as e:
         print(f"   [!] Error fetching USASpending data: {e}")
 
-# --- 3. WAREHOUSE IMAGES (Amazon) ---
+# --- 2. WAREHOUSE IMAGES (Amazon) ---
 def download_amazon_images(mode):
-    print("\n[3/4] Starting Amazon Bin Image Download...")
+    print("\n[2/4] Starting Amazon Bin Image Download...")
     print("   -> Amazon Bin Images: 536,434 JPG images available")
     s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
     bucket_name = 'aft-vbi-pds'
@@ -205,11 +168,11 @@ def download_amazon_images(mode):
     except Exception as e:
         print(f"   [!] AWS Error: {e}")
 
-# --- 4. FINANCIAL STATEMENTS (SEC EDGAR) ---
+# --- 3. FINANCIAL STATEMENTS (SEC EDGAR) ---
 # Real company financial data from SEC filings (10-K, 10-Q reports)
 # Each quarter contains multiple CSV files with balance sheet, income statement, cash flow data
 def download_sec_financials(mode):
-    print("\n[4/4] Fetching SEC Financial Statement Data...")
+    print("\n[3/4] Fetching SEC Financial Statement Data...")
     print("   -> SEC EDGAR: 64 quarters available (2009 Q1 to 2024 Q4)")
     
     # Download 1 quarter for sample, 20 quarters for all (5 years of data)
@@ -266,12 +229,12 @@ def download_sec_financials(mode):
         if mode == 'sample':
             break
 
-# --- 5. REGULATORY DOCUMENTS (Federal Register) ---
+# --- 4. REGULATORY DOCUMENTS (Federal Register) ---
 # Real federal agency rules, proposed rules, and notices (PDFs)
 # Excludes presidential documents per requirements
 # API provides up to 10,000 documents per type (30,000 total available)
 def download_federal_register(mode):
-    print("\n[5/5] Fetching Federal Register Documents...")
+    print("\n[4/4] Fetching Federal Register Documents...")
     api_url = "https://www.federalregister.gov/api/v1/documents.json"
     
     # Sample: 200 docs, All: 10000 docs (reasonable subset of 30K available)
@@ -445,7 +408,6 @@ if __name__ == "__main__":
     print("\nStarting parallel downloads...\n")
     
     threads = [
-        threading.Thread(target=download_govdocs, args=(args.mode,), name="GovDocs"),
         threading.Thread(target=download_federal_contracts, args=(args.mode,), name="Contracts"),
         threading.Thread(target=download_amazon_images, args=(args.mode,), name="Images"),
         threading.Thread(target=download_sec_financials, args=(args.mode,), name="SEC"),
