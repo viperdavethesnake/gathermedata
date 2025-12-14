@@ -252,8 +252,8 @@ def download_federal_register(mode):
     print("\n[5/5] Fetching Federal Register Documents...")
     api_url = "https://www.federalregister.gov/api/v1/documents.json"
     
-    # Sample: 200 docs, All: 5000 docs (reasonable subset of 30K available)
-    limit = 200 if mode == 'sample' else 5000
+    # Sample: 200 docs, All: 10000 docs (reasonable subset of 30K available)
+    limit = 200 if mode == 'sample' else 10000
     
     # Document types to include (excluding Presidential Documents)
     doc_types = ['RULE', 'PRORULE', 'NOTICE']
