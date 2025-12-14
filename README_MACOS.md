@@ -7,7 +7,9 @@ Downloads real-world data from public repositories for NAS testing environments.
 - **macOS 11 (Big Sur) or later**
 - **Python 3.9+** (included with macOS or via Homebrew)
 - Internet connection
-- ~30 GB free space (for sample mode: ~2 GB)
+- Storage space:
+  - Sample mode: ~8 GB
+  - All mode: ~588 GB (or use GovDocs tiers for smaller downloads)
 
 ## Installation
 
@@ -104,12 +106,23 @@ python data_loader.py --mode sample --path /Users/yourname/Desktop/TestData
 
 ## Features
 
+### Main Data Loader (`data_loader.py`)
+- ✅ Downloads from 5 real-world data sources
 - ✅ Parallel downloads using threading
 - ✅ Automatic retry on failures (3 attempts)
 - ✅ Progress bars with tqdm
 - ✅ Resume capability (skips existing files)
+- ✅ Custom download paths with `--path` parameter
 - ✅ Summary report at completion
 - ✅ Platform-aware default paths
+
+### GovDocs1 Downloader (`download_govdocs.py`)
+- ✅ 7 download tiers (1K to 986K files)
+- ✅ Parallel downloads with `--parallel` parameter (default: 4)
+- ✅ Custom thread ranges for precise control
+- ✅ Resume capability (skips existing threads)
+- ✅ Custom download paths with `--path` parameter
+- ✅ Confirmation prompt for large downloads
 
 ## Estimated Download Sizes
 
@@ -125,11 +138,21 @@ python data_loader.py --mode sample --path /Users/yourname/Desktop/TestData
 - Time: 6-12 hours (depends on connection)
 - Files: ~1 million+
 
-### GovDocs1-Only (Separate Script)
-See [README_GOVDOCS.md](README_GOVDOCS.md) for 7 tiers:
-- Tiny: 540 MB (1K files)
-- Sample: 5.4 GB (10K files)
-- Complete: 540 GB (986K files)
+### GovDocs1-Only Downloader (`download_govdocs.py`)
+
+See [README_GOVDOCS.md](README_GOVDOCS.md) for complete details. Quick reference:
+
+| Tier | Files | Size | Command |
+|------|-------|------|---------|
+| **Tiny** | 1K | 540 MB | `python download_govdocs.py --tier tiny` |
+| **Sample** | 10K | 5.4 GB | `python download_govdocs.py --tier sample` |
+| **Small** | 50K | 27 GB | `python download_govdocs.py --tier small` |
+| **Medium** | 100K | 54 GB | `python download_govdocs.py --tier medium` |
+| **Large** | 250K | 135 GB | `python download_govdocs.py --tier large` |
+| **XLarge** | 500K | 270 GB | `python download_govdocs.py --tier xlarge` |
+| **Complete** | 986K | 540 GB | `python download_govdocs.py --tier complete` |
+
+Add `--parallel 8` for faster downloads with 8 concurrent workers.
 
 ## macOS-Specific Tips
 

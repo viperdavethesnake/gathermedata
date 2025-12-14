@@ -13,7 +13,7 @@ Downloads real-world data from public repositories for NAS testing environments.
    - Multiple CSV files per quarter
 5. **Regulatory Documents**: Federal Register - Agency rules and notices (PDF)
    - Final rules, proposed rules, public notices from federal agencies
-   - 30,000+ documents available (sample: 200, all: 5,000)
+   - 30,000+ documents available (sample: 200, all: 10,000)
    - Daily updates, excludes presidential documents
 
 ## Setup
@@ -33,18 +33,52 @@ pip install -r requirements.txt
 
 ## Usage
 
+### Main Data Loader (All 5 Sources)
+
+**Python:**
 ```bash
-# Download sample data (~2 GB) - uses platform default path
+# Download sample data (~8 GB) - uses platform default path
 python data_loader.py --mode sample
 
-# Download full datasets (~30 GB)
+# Download full datasets (~588 GB)
 python data_loader.py --mode all
 
 # Specify custom download path
-python data_loader.py --mode sample --path /your/custom/path
-
-# Example with custom path
 python data_loader.py --mode all --path /mnt/nas/testdata
+```
+
+**PowerShell (Windows):**
+```powershell
+# Download sample data
+.\data_loader.ps1 -Mode sample
+
+# Download full datasets with custom path
+.\data_loader.ps1 -Mode all -Path "D:\TestData"
+```
+
+### GovDocs1-Only Downloader (Dedicated Script)
+
+For granular control over GovDocs1 downloads (7 tiers):
+
+**Python:**
+```bash
+# List available tiers
+python download_govdocs.py --list
+
+# Download specific tier with parallel downloads
+python download_govdocs.py --tier medium --parallel 8
+
+# Custom path
+python download_govdocs.py --tier complete --path /storage/govdocs
+```
+
+**PowerShell (Windows):**
+```powershell
+# List available tiers
+.\download_govdocs.ps1 -List
+
+# Download with parallel jobs
+.\download_govdocs.ps1 -Tier medium -Parallel 8 -Path "D:\GovDocs1"
 ```
 
 ### Default Paths by Platform
@@ -64,11 +98,22 @@ python data_loader.py --mode all --path /mnt/nas/testdata
 
 ## Features
 
-- Automatic retry on network failures
-- Progress bars for all downloads
-- Resume capability (skips existing files)
-- Summary report at completion
-- Organized directory structure
+### Main Data Loader (`data_loader.py` / `data_loader.ps1`)
+- ✅ Downloads from 5 real-world data sources
+- ✅ Automatic retry on network failures
+- ✅ Progress bars for all downloads
+- ✅ Resume capability (skips existing files)
+- ✅ Summary report at completion
+- ✅ Custom download paths
+- ✅ Cross-platform (Python + PowerShell)
+
+### GovDocs1 Downloader (`download_govdocs.py` / `download_govdocs.ps1`)
+- ✅ 7 download tiers (1K to 986K files)
+- ✅ Parallel downloads (4-8 workers recommended)
+- ✅ Custom thread ranges for precise control
+- ✅ Resume capability (skips existing threads)
+- ✅ Custom download paths
+- ✅ Cross-platform (Python + PowerShell)
 
 ## Storage Requirements
 

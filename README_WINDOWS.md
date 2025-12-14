@@ -7,7 +7,9 @@ Downloads real-world data from public repositories for NAS testing environments.
 - **PowerShell 7.0 or later** (latest: 7.5.4)
 - Windows 10/11 or Windows Server 2019+
 - Internet connection
-- ~30 GB free space (for sample mode: ~2 GB)
+- Storage space:
+  - Sample mode: ~8 GB
+  - All mode: ~588 GB (or use GovDocs tiers for smaller downloads)
 
 ### Install PowerShell 7
 
@@ -102,23 +104,55 @@ The script creates subdirectories:
 
 ## Features
 
+### Main Data Loader (`data_loader.ps1`)
+- ✅ Downloads from 5 real-world data sources
 - ✅ Parallel downloads using PowerShell jobs
 - ✅ Automatic retry on failures (3 attempts)
 - ✅ Progress reporting
 - ✅ Resume capability (skips existing files)
+- ✅ Custom download paths with `-Path` parameter
 - ✅ Summary report at completion
+
+### GovDocs1 Downloader (`download_govdocs.ps1`)
+- ✅ 7 download tiers (1K to 986K files)
+- ✅ Parallel downloads with `-Parallel` parameter (default: 4)
+- ✅ Custom thread ranges for precise control
+- ✅ Resume capability (skips existing threads)
+- ✅ Custom download paths with `-Path` parameter
+- ✅ Confirmation prompt for large downloads
 
 ## Estimated Download Sizes
 
-### Sample Mode
-- Download: ~2 GB
-- Storage: ~1.5 GB
-- Time: ~5-10 minutes (depends on connection)
+### Main Data Loader (`data_loader.ps1`)
 
-### All Mode
-- Download: ~30 GB
-- Storage: ~26 GB
-- Time: ~30-60 minutes (depends on connection)
+**Sample Mode:**
+- Download: ~8 GB
+- Storage: ~6 GB
+- Time: ~10-20 minutes (depends on connection)
+- Files: ~12,000+
+
+**All Mode:**
+- Download: ~588 GB
+- Storage: ~300-588 GB (depends on filesystem compression)
+- Time: 6-12 hours (depends on connection)
+- Files: ~1 million+
+- Breakdown:
+  - GovDocs1: ~540 GB (986K files)
+  - Amazon Images: ~27 GB (50K images) - *requires AWS.Tools.S3*
+  - SEC Financials: ~12 GB (20 quarters)
+  - Federal Register: ~4 GB (10K PDFs)
+  - Federal Contracts: <1 MB (JSON)
+
+### GovDocs1-Only Downloader (`download_govdocs.ps1`)
+
+See [README_GOVDOCS.md](README_GOVDOCS.md) for complete tier breakdown:
+- **Tiny**: 540 MB (1K files)
+- **Sample**: 5.4 GB (10K files)
+- **Small**: 27 GB (50K files)
+- **Medium**: 54 GB (100K files)
+- **Large**: 135 GB (250K files)
+- **XLarge**: 270 GB (500K files)
+- **Complete**: 540 GB (986K files)
 
 ## Troubleshooting
 
